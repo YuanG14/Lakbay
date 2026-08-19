@@ -253,3 +253,80 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
     font-size:13px;
   }
 }
+
+/* Landing trip-estimate preview — polished single-card layout */
+.landing-preview{
+  transform:none;
+  overflow:hidden;
+  background:linear-gradient(180deg,#ffffff 0%,#f7fbf9 100%);
+  border:1px solid #d8e7df;
+  border-radius:26px;
+  padding:28px;
+  box-shadow:0 24px 60px rgba(29,75,58,.12);
+}
+.landing-preview:before{display:none}
+.preview-topline{
+  padding-bottom:18px;
+  border-bottom:1px solid #e5eee9;
+  font-size:12px;
+  color:#5f746b;
+}
+.preview-route{
+  grid-template-columns:minmax(0,1fr) minmax(70px,.9fr) minmax(0,1fr);
+  gap:18px;
+  margin:24px 0 18px;
+}
+.preview-route>div:last-child{justify-content:flex-end}
+.preview-route>div:last-child p{text-align:left}
+.preview-route small{font-size:10px}
+.preview-route strong{font-size:16px;line-height:1.2}
+.route-dash{border-top-color:#c8d9d0}
+.preview-distance{
+  min-height:52px;
+  padding:0 15px;
+  border-radius:14px;
+  background:#fff;
+  border-color:#dfeae4;
+  box-shadow:0 4px 14px rgba(28,68,52,.04);
+}
+.preview-distance span{font-size:15px}
+.preview-distance small{font-size:12px}
+.preview-cost-card{
+  margin-top:16px;
+  border-radius:18px;
+  padding:20px 21px 19px;
+  background:linear-gradient(135deg,#0f6049 0%,#117256 100%);
+  box-shadow:none;
+}
+.preview-cost-card>div:first-child{align-items:center}
+.preview-cost-card small{font-size:12px}
+.preview-cost-card strong{font-size:30px;line-height:1}
+.preview-breakdown{gap:9px;margin-top:18px}
+.preview-breakdown span{
+  min-height:60px;
+  padding:11px 12px;
+  border-radius:12px;
+  background:rgba(255,255,255,.11);
+  font-size:11px;
+  justify-content:center;
+}
+.preview-breakdown b{font-size:14px}
+.preview-split{
+  margin-top:14px;
+  min-height:50px;
+  padding:0 14px;
+  border-radius:14px;
+  background:#fff;
+  border-color:#dfeae4;
+}
+.preview-split>span{font-size:12px}
+.preview-split strong{font-size:16px}
+.preview-split small{font-size:11px}
+
+@media(max-width:700px){
+  .landing-preview{padding:20px;border-radius:22px}
+  .preview-route{grid-template-columns:1fr;gap:12px;margin:20px 0 16px}
+  .preview-route>div:last-child{justify-content:flex-start}
+  .preview-breakdown{grid-template-columns:1fr}
+  .preview-breakdown span{min-height:54px}
+}
