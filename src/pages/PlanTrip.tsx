@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   ArrowRight, Calculator, CarFront, CheckCircle2, CircleDollarSign, Clock3, Fuel,
@@ -10,6 +10,7 @@ import RouteMap, { LatLng } from '../components/RouteMap';
 import { useVehicles } from '../context/VehicleContext';
 import { useTrips } from '../context/TripContext';
 import { ExpenseCategory, SharedTripMember, TollItem, TripExpense } from '../types/trip';
+import { readPreferences } from '../lib/preferences';
 
 type TripType = 'round' | 'oneway';
 type GeocodeResult = { lat: string; lon: string; display_name: string };
@@ -54,17 +55,19 @@ function formatDuration(seconds: number) {
 
 export default function PlanTrip() {
   const [searchParams] = useSearchParams();
-  const { addTrip, getTrip } = useTrips();
+  const { addTrip, getTrip, syncError: tripSyncError, clearSyncError: clearTripSyncError } = useTrips();
   const { vehicles, defaultVehicle } = useVehicles();
 
   const [origin, setOrigin] = useState('Batangas City');
   const [destination, setDestination] = useState('Alabang, Muntinlupa');
-  const [vehicleId, setVehicleId] = useState(defaultVehicle?.id ?? 'custom');
+  const initialPreferences = useMemo(() => readPreferences(), []);
+  const initializedDefaultVehicle = useRef(false);
+  const [vehicleId, setVehicleId] = useState(initialPreferences.defaultVehicleId || defaultVehicle?.id || 'custom');
   const [tripType, setTripType] = useState<TripType>('round');
   const [distance, setDistance] = useState(105);
   const selectedVehicle = vehicles.find((item) => item.id === vehicleId);
   const [efficiency, setEfficiency] = useState(defaultVehicle?.efficiency ?? 14);
-  const [fuelPrice, setFuelPrice] = useState(78);
+  const [fuelPrice, setFuelPrice] = useState(initialPreferences.fuelPrice);
   const [parking, setParking] = useState(100);
   const [passengers, setPassengers] = useState(4);
   const [sharedTrip, setSharedTrip] = useState(false);
@@ -86,6 +89,14 @@ export default function PlanTrip() {
   const [routeResolved, setRouteResolved] = useState(false); const [manualDistance, setManualDistance] = useState(false);
 
   useEffect(() => { const selected = vehicles.find((item) => item.id === vehicleId); if (selected) setEfficiency(selected.efficiency); }, [vehicleId, vehicles]);
+
+  useEffect(() => {
+    if (initializedDefaultVehicle.current || !vehicles.length) return;
+    initializedDefaultVehicle.current = true;
+    const preferredId = initialPreferences.defaultVehicleId;
+    const preferred = vehicles.find((vehicle) => vehicle.id === preferredId) ?? defaultVehicle;
+    if (preferred) { setVehicleId(preferred.id); setEfficiency(preferred.efficiency); }
+  }, [vehicles, defaultVehicle, initialPreferences.defaultVehicleId]);
 
   useEffect(() => {
     const reuseId = searchParams.get('reuse'); if (!reuseId) return;
@@ -205,6 +216,7 @@ export default function PlanTrip() {
 
   return <div className="page-stack">
     <PageHeader eyebrow="Plan Trip" title="Build your trip estimate" subtitle="Find the road route, organize toll segments, add real trip expenses, and see the true cost before you leave." />
+    {tripSyncError && <div className="sync-alert" role="alert"><span>{tripSyncError}</span><button type="button" onClick={clearTripSyncError}>Dismiss</button></div>}
     {savedMessage && <div className="trip-save-notice"><CheckCircle2 size={17}/><span>{savedMessage}</span></div>}
 
     <section className="route-planner-panel panel">

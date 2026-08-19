@@ -1,7 +1,8 @@
-import { Bell, CarFront, ChartNoAxesCombined, Compass, LayoutDashboard, LogOut, Menu, Route, Settings, X } from 'lucide-react';
-import { useState } from 'react';
+import { CarFront, ChartNoAxesCombined, Compass, LayoutDashboard, LogOut, Menu, Route, Settings, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import NetworkStatus from '../ui/NetworkStatus';
 
 const items = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -14,23 +15,36 @@ const items = [
 
 export default function AppShell() {
   const [open, setOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const { user, logout } = useAuth();
   const displayName = user?.displayName || user?.email?.split('@')[0] || 'Traveler';
-  const initials = displayName.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase();
+  const initials = displayName.split(' ').filter(Boolean).map((part) => part[0]).join('').slice(0, 2).toUpperCase();
+
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [open]);
 
   const links = (
-    <nav className="nav-list">
+    <nav className="nav-list" aria-label="Primary navigation">
       {items.map(({ to, label, icon: Icon, end }) => (
         <NavLink key={to} to={to} end={end} onClick={() => setOpen(false)} className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}>
-          <Icon size={19} strokeWidth={2.1} />
+          <Icon size={19} strokeWidth={2.1} aria-hidden="true" />
           <span>{label}</span>
         </NavLink>
       ))}
     </nav>
   );
 
+  async function handleLogout() {
+    if (signingOut) return;
+    setSigningOut(true);
+    try { await logout(); } finally { setSigningOut(false); }
+  }
+
   return (
     <div className="app-shell">
+      <a className="skip-link" href="#main-content">Skip to main content</a>
       <aside className="sidebar desktop-sidebar">
         <Brand />
         {links}
@@ -42,7 +56,7 @@ export default function AppShell() {
       </aside>
 
       {open && <button className="scrim" onClick={() => setOpen(false)} aria-label="Close menu" />}
-      <aside className={`sidebar mobile-drawer${open ? ' open' : ''}`}>
+      <aside className={`sidebar mobile-drawer${open ? ' open' : ''}`} aria-hidden={!open}>
         <div className="drawer-top">
           <Brand />
           <button className="icon-btn" onClick={() => setOpen(false)} aria-label="Close navigation"><X size={20} /></button>
@@ -51,23 +65,20 @@ export default function AppShell() {
       </aside>
 
       <div className="main-area">
+        <NetworkStatus />
         <header className="topbar">
           <button className="icon-btn mobile-menu" onClick={() => setOpen(true)} aria-label="Open navigation"><Menu size={21} /></button>
           <div className="topbar-spacer" />
-          <button className="icon-btn notification-btn" aria-label="Notifications">
-            <Bell size={19} />
-            <span className="notification-dot" />
-          </button>
-          <div className="profile-chip">
-            <div className="avatar">{initials}</div>
+          <div className="profile-chip" title={user?.email ?? undefined}>
+            <div className="avatar" aria-hidden="true">{initials}</div>
             <div className="profile-copy">
               <strong>{displayName}</strong>
               <span>{user?.email}</span>
             </div>
           </div>
-          <button className="icon-btn" onClick={() => logout()} aria-label="Sign out" title="Sign out"><LogOut size={18} /></button>
+          <button className="icon-btn" disabled={signingOut} onClick={handleLogout} aria-label="Sign out" title="Sign out"><LogOut size={18} /></button>
         </header>
-        <main className="page-wrap"><Outlet /></main>
+        <main className="page-wrap" id="main-content" tabIndex={-1}><Outlet /></main>
       </div>
     </div>
   );

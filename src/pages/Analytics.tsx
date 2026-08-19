@@ -31,7 +31,7 @@ function expenseBreakdown(trips: SavedTrip[]) {
 const insightIcons:Record<InsightKind,React.ReactNode>={ saving:<CircleDollarSign/>,fuel:<Fuel/>,sharing:<UsersRound/>,pattern:<TrendingUp/>,warning:<TriangleAlert/>,win:<Trophy/> };
 
 export default function Analytics(){
- const {trips,loading}=useTrips(); const {vehicles}=useVehicles();
+ const {trips,loading,syncError,clearSyncError}=useTrips(); const {vehicles}=useVehicles();
  const monthOptions=useMemo(()=>{const keys=Array.from(new Set(trips.map(t=>monthKey(t.createdAt)))).sort().reverse();const current=monthKey(new Date());if(!keys.includes(current))keys.unshift(current);return keys;},[trips]);
  const [selectedMonth,setSelectedMonth]=useState(()=>monthKey(new Date()));
  const visibleTrips=useMemo(()=>trips.filter(t=>monthKey(t.createdAt)===selectedMonth),[trips,selectedMonth]);
@@ -46,6 +46,7 @@ export default function Analytics(){
  const insights=useMemo(()=>generateTripInsights(trips,vehicles),[trips,vehicles]);
  return <div className="page-stack analytics-page">
   <PageHeader eyebrow="Analytics" title="Understand your travel spending" subtitle="Live analytics and rule-based recommendations from the trips saved to your Lakbay account."/>
+  {syncError&&<div className="sync-alert" role="alert"><span>{syncError}</span><button type="button" onClick={clearSyncError}>Dismiss</button></div>}
   <div className="analytics-toolbar panel"><div><CalendarDays size={17}/><div><span>Reporting period</span><strong>{monthLabel.format(selectedDate)}</strong></div></div><label className="analytics-month-select"><select value={selectedMonth} onChange={e=>setSelectedMonth(e.target.value)}>{monthOptions.map(key=>{const[y,m]=key.split('-').map(Number);return <option value={key} key={key}>{monthLabel.format(new Date(y,m-1,1))}</option>})}</select><ChevronDown size={15}/></label></div>
   <section className="stat-grid analytics-stat-grid"><Metric icon={<WalletCards/>} label="Total spending" value={peso.format(stats.spending)} detail={stats.change===null?'No previous-month baseline':`${stats.change>=0?'+':''}${number.format(stats.change)}% vs previous month`}/><Metric icon={<Route/>} label="Distance traveled" value={`${number.format(stats.distance)} km`} detail={`${visibleTrips.length} saved trip${visibleTrips.length===1?'':'s'}`}/><Metric icon={<Fuel/>} label="Fuel used" value={`${number.format(stats.fuel)} L`} detail="Estimated from vehicle efficiency"/><Metric icon={<BarChart3/>} label="Average trip" value={peso.format(stats.average)} detail="Average total cost"/></section>
 
