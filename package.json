@@ -1,7 +1,7 @@
 {
-  "name": "lakbay-phase-4",
+  "name": "lakbay-phase-5",
   "private": true,
-  "version": "4.0.0",
+  "version": "5.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -15,7 +15,8 @@
     "react": "latest",
     "react-dom": "latest",
     "react-router-dom": "latest",
-    "lucide-react": "latest"
+    "lucide-react": "latest",
+    "firebase": "^12.2.1"
   },
   "devDependencies": {}
 }

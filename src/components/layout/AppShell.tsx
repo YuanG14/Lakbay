@@ -1,6 +1,7 @@
-import { Bell, CarFront, ChartNoAxesCombined, Compass, LayoutDashboard, Menu, Route, Settings, X } from 'lucide-react';
+import { Bell, CarFront, ChartNoAxesCombined, Compass, LayoutDashboard, LogOut, Menu, Route, Settings, X } from 'lucide-react';
 import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const items = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -13,6 +14,9 @@ const items = [
 
 export default function AppShell() {
   const [open, setOpen] = useState(false);
+  const { user, logout } = useAuth();
+  const displayName = user?.displayName || user?.email?.split('@')[0] || 'Traveler';
+  const initials = displayName.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase();
 
   const links = (
     <nav className="nav-list">
@@ -55,12 +59,13 @@ export default function AppShell() {
             <span className="notification-dot" />
           </button>
           <div className="profile-chip">
-            <div className="avatar">JC</div>
+            <div className="avatar">{initials}</div>
             <div className="profile-copy">
-              <strong>Joshua</strong>
-              <span>Traveler</span>
+              <strong>{displayName}</strong>
+              <span>{user?.email}</span>
             </div>
           </div>
+          <button className="icon-btn" onClick={() => logout()} aria-label="Sign out" title="Sign out"><LogOut size={18} /></button>
         </header>
         <main className="page-wrap"><Outlet /></main>
       </div>
