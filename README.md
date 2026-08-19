@@ -55,3 +55,10 @@ Analytics updates automatically whenever saved trips change. Older trips remain 
 ## Phase 10 — Smart Insights
 
 Phase 10 adds a transparent, rule-based recommendation engine to Analytics. It detects expensive trips, fuel-heavy routes, passenger-sharing opportunities, repeat routes, potential savings from more efficient saved vehicles, and cost-efficient travel patterns. No paid AI API is required.
+
+
+## Phase 11 — Shared Trips
+
+Phase 11 adds group-trip cost splitting to Plan Trip. Enable Shared Trip, add participants, select the driver, and choose a 0%, 25%, 50%, or 100% driver discount. Lakbay redistributes the remaining cost automatically and saves the contribution breakdown with the trip in Firestore.
+
+Shared trips remain compatible with older saved trips that do not contain participant data.

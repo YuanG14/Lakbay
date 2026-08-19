@@ -15,6 +15,13 @@ export type TripExpense = {
   amount: number;
 };
 
+export type SharedTripMember = {
+  id: string;
+  name: string;
+  isDriver: boolean;
+  contribution: number;
+};
+
 export interface SavedTrip {
   id: string;
   origin: string;
@@ -36,6 +43,9 @@ export interface SavedTrip {
   total: number;
   perPerson: number;
   costPerKm: number;
+  sharedTrip?: boolean;
+  driverDiscount?: number;
+  members?: SharedTripMember[];
   tollItems?: TollItem[];
   expenseItems?: TripExpense[];
   createdAt: string;
