@@ -1,4 +1,4 @@
-import { FormEvent, useMemo, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
 import {
   ArrowRight,
   Calculator,
@@ -13,6 +13,7 @@ import {
   UsersRound,
 } from 'lucide-react';
 import PageHeader from '../components/ui/PageHeader';
+import { useVehicles } from '../context/VehicleContext';
 
 type TripType = 'round' | 'oneway';
 
@@ -28,10 +29,12 @@ const number = new Intl.NumberFormat('en-PH', { maximumFractionDigits: 2 });
 export default function PlanTrip() {
   const [origin, setOrigin] = useState('Batangas City');
   const [destination, setDestination] = useState('Alabang, Muntinlupa');
-  const [vehicle, setVehicle] = useState('Toyota Vios XLE');
+  const { vehicles, defaultVehicle } = useVehicles();
+  const [vehicleId, setVehicleId] = useState(defaultVehicle?.id ?? 'custom');
   const [tripType, setTripType] = useState<TripType>('round');
   const [distance, setDistance] = useState(105);
-  const [efficiency, setEfficiency] = useState(14);
+  const selectedVehicle = vehicles.find((item) => item.id === vehicleId);
+  const [efficiency, setEfficiency] = useState(defaultVehicle?.efficiency ?? 14);
   const [fuelPrice, setFuelPrice] = useState(78);
   const [toll, setToll] = useState(510);
   const [parking, setParking] = useState(100);
@@ -39,6 +42,13 @@ export default function PlanTrip() {
   const [passengers, setPassengers] = useState(4);
   const [hasCalculated, setHasCalculated] = useState(true);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    const selected = vehicles.find((item) => item.id === vehicleId);
+    if (selected) setEfficiency(selected.efficiency);
+  }, [vehicleId, vehicles]);
+
+  const vehicleName = selectedVehicle?.name ?? 'Custom vehicle';
 
   const result = useMemo(() => {
     const multiplier = tripType === 'round' ? 2 : 1;
@@ -92,11 +102,13 @@ export default function PlanTrip() {
                 <input value={destination} onChange={(e) => setDestination(e.target.value)} placeholder="Alabang, Muntinlupa" />
               </Field>
               <Field label="Vehicle" icon={<CarFront size={18} />}>
-                <select value={vehicle} onChange={(e) => setVehicle(e.target.value)}>
-                  <option>Toyota Vios XLE</option>
-                  <option>Honda City RS</option>
-                  <option>Mitsubishi Xpander</option>
-                  <option>Custom vehicle</option>
+                <select value={vehicleId} onChange={(e) => setVehicleId(e.target.value)}>
+                  {vehicles.map((savedVehicle) => (
+                    <option key={savedVehicle.id} value={savedVehicle.id}>
+                      {savedVehicle.name}{savedVehicle.isDefault ? ' • Default' : ''}
+                    </option>
+                  ))}
+                  <option value="custom">Custom vehicle</option>
                 </select>
               </Field>
               <label>
@@ -118,7 +130,7 @@ export default function PlanTrip() {
             </div>
             <div className="field-grid three-fields">
               <NumberField label="One-way distance" value={distance} setValue={setDistance} suffix="km" min={0} />
-              <NumberField label="Fuel efficiency" value={efficiency} setValue={setEfficiency} suffix="km/L" min={0} step="0.1" />
+              <NumberField label="Fuel efficiency" value={efficiency} setValue={setEfficiency} suffix="km/L" min={0} step="0.1" disabled={!!selectedVehicle} />
               <NumberField label="Fuel price" value={fuelPrice} setValue={setFuelPrice} prefix="₱" suffix="/L" min={0} step="0.01" />
             </div>
           </div>
@@ -146,7 +158,7 @@ export default function PlanTrip() {
           <div className="trip-result-card">
             <div className="result-topline"><span>Estimated trip cost</span><span className="live-pill">LIVE</span></div>
             <div className="result-route"><strong>{origin || 'Origin'}</strong><ArrowRight size={15} /><strong>{destination || 'Destination'}</strong></div>
-            <div className="result-meta">{number.format(result.totalDistance)} km • {tripType === 'round' ? 'Round trip' : 'One way'} • {vehicle}</div>
+            <div className="result-meta">{number.format(result.totalDistance)} km • {tripType === 'round' ? 'Round trip' : 'One way'} • {vehicleName}</div>
 
             <div className="grand-total">{hasCalculated ? peso.format(result.total) : '₱0.00'}</div>
             <div className="per-person"><UsersRound size={17} /><span>{peso.format(result.perPerson)} per person</span></div>
@@ -180,13 +192,13 @@ function Field({ label, icon, children }: { label: string; icon: React.ReactNode
   return <label><span>{label}</span><div className="input-shell">{icon}{children}</div></label>;
 }
 
-function NumberField({ label, value, setValue, prefix, suffix, min, step = '1' }: any) {
+function NumberField({ label, value, setValue, prefix, suffix, min, step = '1', disabled = false }: any) {
   return (
     <label>
       <span>{label}</span>
       <div className="number-input-shell">
         {prefix && <span className="input-affix">{prefix}</span>}
-        <input type="number" min={min} step={step} value={value} onChange={(e) => setValue(Number(e.target.value))} />
+        <input type="number" min={min} step={step} value={value} disabled={disabled} onChange={(e) => setValue(Number(e.target.value))} />
         {suffix && <span className="input-affix suffix">{suffix}</span>}
       </div>
     </label>
