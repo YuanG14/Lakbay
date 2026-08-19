@@ -94,6 +94,8 @@ function TripDetails({ trip, onClose, onReuse, onDelete }: { trip: SavedTrip; on
       <Detail label="Fuel cost" value={peso.format(trip.fuelCost)}/><Detail label="Tolls" value={peso.format(trip.tollCost)}/>
       <Detail label="Parking" value={peso.format(trip.parking)}/><Detail label="Other expenses" value={peso.format(trip.other)}/>
     </div>
+    {trip.tollItems?.length ? <div className="trip-detail-cost-section"><h3>Toll breakdown</h3><div className="trip-detail-mini-list">{trip.tollItems.map((item) => <div className="trip-detail-mini-row" key={item.id}><span>{item.label}</span><strong>{peso.format(item.oneWayAmount)} one way</strong></div>)}</div></div> : null}
+    {trip.expenseItems?.length ? <div className="trip-detail-cost-section"><h3>Additional expenses</h3><div className="trip-detail-mini-list">{trip.expenseItems.map((item) => <div className="trip-detail-mini-row" key={item.id}><span>{item.label}</span><strong>{peso.format(item.amount)}</strong></div>)}</div></div> : null}
     <div className="modal-actions trip-detail-actions"><button className="ghost-btn trip-delete-btn" onClick={onDelete}><Trash2 size={16}/> Delete</button><button className="secondary-btn" onClick={onClose}>Close</button><button className="primary-btn" onClick={onReuse}><Copy size={16}/> Reuse trip</button></div>
   </div></div>;
 }
