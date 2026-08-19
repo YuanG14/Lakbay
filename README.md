@@ -7,9 +7,10 @@ Lakbay is a portfolio-ready React web application for Philippine road-trip budge
 - Firebase Email/Password authentication
 - Firestore-backed user-specific vehicles and trips
 - My Garage with default vehicles and fuel-efficiency profiles
-- OpenStreetMap/Leaflet map visualization
-- Automatic Philippine place lookup and road-routing distance
-- Manual-distance fallback when public routing is unavailable
+- Free Maps route visualization
+- Google Places autocomplete restricted to Philippine results
+- Google Routes driving distance and estimated travel time
+- Manual-distance fallback when Google routing is unavailable
 - Fuel, toll, parking and flexible expense calculations
 - Multiple named toll segments with user-entered current prices
 - Saved trip history with search, details, reuse and delete
@@ -33,9 +34,9 @@ Lakbay is a portfolio-ready React web application for Philippine road-trip budge
 - React Router
 - Firebase Authentication
 - Cloud Firestore
-- Leaflet + React Leaflet
-- OpenStreetMap / Nominatim place search
-- OSRM public routing service
+- Free Maps JavaScript API
+- Places API (New)
+- Routes API
 - Lucide React icons
 
 ## Run locally
@@ -43,7 +44,8 @@ Lakbay is a portfolio-ready React web application for Philippine road-trip budge
 1. Extract the project.
 2. Copy `.env.example` to `.env`.
 3. Paste your Firebase Web App configuration into `.env`.
-4. Install dependencies and start Vite:
+4. Add your Free Maps browser API key as `VITE_GRAPHHOPPER_API_KEY`.
+5. Install dependencies and start Vite:
 
 ```bash
 npm install
@@ -71,6 +73,7 @@ VITE_FIREBASE_PROJECT_ID=
 VITE_FIREBASE_STORAGE_BUCKET=
 VITE_FIREBASE_MESSAGING_SENDER_ID=
 VITE_FIREBASE_APP_ID=
+VITE_GRAPHHOPPER_API_KEY=
 ```
 
 `.env` is intentionally ignored by Git. Commit `.env.example`, never your local `.env`.
@@ -88,7 +91,7 @@ users/{uid}/trips/{tripId}
 
 ## Mapping and routing note
 
-Lakbay currently uses public OpenStreetMap/Nominatim/OSRM services so the portfolio project can run without a paid map key. Public services can have availability and usage limits, so Lakbay keeps a manual-distance fallback. For a high-traffic commercial deployment, replace these public endpoints with a production routing/geocoding provider.
+Lakbay uses Free Maps Platform for place autocomplete, route visualization, driving distance, and estimated travel time. A billing-enabled Google Cloud project and a browser API key are required. Enable **Maps JavaScript API**, **Places API (New)**, and **Routes API**. The manual-distance fallback remains available if routing is unavailable. See `FREE_MAPS_SETUP.md` for the exact setup.
 
 ## Toll-rate note
 
@@ -98,8 +101,9 @@ Lakbay intentionally does not hard-code Philippine toll prices because rates can
 
 1. Push this project to GitHub.
 2. Import the repository into Vercel.
-3. Add all `VITE_FIREBASE_*` variables in **Project Settings → Environment Variables**.
-4. Deploy.
+3. Add all `VITE_FIREBASE_*` variables and `VITE_GRAPHHOPPER_API_KEY` in **Project Settings → Environment Variables**.
+4. Add your deployed Vercel domain to the Free Maps API key HTTP-referrer restrictions.
+5. Deploy.
 
 `vercel.json` includes the SPA rewrite needed for React Router routes such as `/plan-trip`, `/garage` and `/analytics`.
 
@@ -110,3 +114,13 @@ The repository includes `.gitignore` rules for dependencies, builds, local envir
 ## Final phase
 
 Phase 12 is the final core implementation and production-polish pass. Future work can be treated as optional product expansion rather than required project completion.
+
+## Free Maps integration
+
+Lakbay now uses Free Maps Platform for the Plan Trip route finder. Enable **Maps JavaScript API**, **Places API (New)**, and **Routes API** in the same billing-enabled Google Cloud project, then add `VITE_GRAPHHOPPER_API_KEY` to `.env`.
+
+The route finder uses Google Places autocomplete restricted to the Philippines, Google road routing for distance and estimated drive time, and a Google Map for the route preview. Restrict the browser API key to your local and deployed domains before publishing.
+
+## Free mapping stack
+
+The route finder uses MapLibre GL JS, OpenStreetMap tiles/data, and GraphHopper for geocoding + road routing. This build does not require Google Maps or a Google Cloud billing account. See `FREE_MAPS_SETUP.md`.
