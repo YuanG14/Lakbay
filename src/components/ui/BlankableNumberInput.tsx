@@ -41,9 +41,20 @@ export default function BlankableNumberInput({ value, onValueChange, onEmpty, on
         if (Number.isFinite(next)) onValueChange(next);
       }}
       onBlur={(event) => {
-        // Normalize formatting on blur (e.g. 00500 -> 500). If the field was
-        // left empty and the parent keeps a required numeric value, restore it.
-        setDraft(toDraft(value));
+        // Let the field stay blank while the user is replacing its value, but
+        // normalize an intentionally cleared field to 0 when editing ends.
+        if (draft.trim() === '') {
+          onValueChange(0);
+          setDraft('0');
+        } else {
+          const normalized = Number(draft);
+          if (Number.isFinite(normalized)) {
+            onValueChange(normalized);
+            setDraft(String(normalized));
+          } else {
+            setDraft(toDraft(value));
+          }
+        }
         onBlur?.(event);
       }}
     />
