@@ -330,3 +330,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
   .preview-breakdown{grid-template-columns:1fr}
   .preview-breakdown span{min-height:54px}
 }
+
+/* Landing header spacing refinement */
+@media (min-width:1001px){
+  .landing-links{gap:42px}
+  .landing-actions{gap:26px;margin-left:34px}
+}
