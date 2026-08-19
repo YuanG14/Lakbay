@@ -9,7 +9,7 @@ const peso = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP'
 const number = new Intl.NumberFormat('en-PH', { maximumFractionDigits: 2 });
 
 export default function Trips() {
-  const { trips, deleteTrip } = useTrips();
+  const { trips, loading, syncError, clearSyncError, deleteTrip } = useTrips();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
@@ -40,6 +40,8 @@ export default function Trips() {
     <div className="page-stack">
       <PageHeader eyebrow="My Trips" title="Your travel history" subtitle="Save estimates, review previous costs, and reuse a trip when you travel the same route again." action={<button className="primary-btn" onClick={() => navigate('/plan-trip')}><Plus size={17}/> New trip</button>} />
 
+      {syncError && <div className="sync-alert" role="alert"><span>{syncError}</span><button type="button" onClick={clearSyncError}>Dismiss</button></div>}
+
       <div className="trip-history-stats">
         <div className="garage-summary-card"><CalendarDays/><span>Saved trips</span><strong>{trips.length}</strong></div>
         <div className="garage-summary-card"><MapPin/><span>Total distance</span><strong>{number.format(totalDistance)} km</strong></div>
@@ -52,7 +54,9 @@ export default function Trips() {
           <select className="plain-select" value={filter} onChange={(e) => setFilter(e.target.value)}><option value="all">All trips</option><option value="month">This month</option></select>
         </div>
 
-        {filteredTrips.length === 0 ? (
+        {loading ? (
+          <div className="trip-history-list" aria-label="Loading trips">{[1,2,3].map((item) => <div className="saved-trip-card skeleton-trip" key={item}><span className="skeleton-line wide"/><span className="skeleton-line"/></div>)}</div>
+        ) : filteredTrips.length === 0 ? (
           <div className="trip-empty-state">
             <div className="empty-icon"><MapPin size={26}/></div>
             <h2>{trips.length ? 'No trips match your search' : 'No saved trips yet'}</h2>
@@ -86,7 +90,7 @@ export default function Trips() {
 
 function TripDetails({ trip, onClose, onReuse, onDelete }: { trip: SavedTrip; onClose: () => void; onReuse: () => void; onDelete: () => void }) {
   return <div className="modal-backdrop" onMouseDown={onClose}><div className="trip-detail-modal" onMouseDown={(e) => e.stopPropagation()}>
-    <div className="modal-header"><div><div className="section-kicker">Trip details</div><h2>{trip.origin} <ArrowRight size={18}/> {trip.destination}</h2><p>Saved {formatDate(trip.createdAt)}</p></div><button className="icon-btn" onClick={onClose}><X size={18}/></button></div>
+    <div className="modal-header"><div><div className="section-kicker">Trip details</div><h2>{trip.origin} <ArrowRight size={18}/> {trip.destination}</h2><p>Saved {formatDate(trip.createdAt)}</p></div><button className="icon-btn" onClick={onClose} aria-label="Close trip details"><X size={18}/></button></div>
     <div className="trip-detail-total"><span>Estimated trip cost</span><strong>{peso.format(trip.total)}</strong><small>{peso.format(trip.perPerson)} per traveler • {trip.passengers} travelers</small></div>
     <div className="trip-detail-grid">
       <Detail label="Vehicle" value={trip.vehicleName}/><Detail label="Trip type" value={trip.tripType === 'round' ? 'Round trip' : 'One way'}/>

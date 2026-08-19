@@ -1,64 +1,112 @@
-# Lakbay — Phase 10
+# Lakbay — Smart Trip Cost Planner
 
-Smart Trip Cost Planner built with React, Vite, TypeScript, Firebase, Firestore, OpenStreetMap and Leaflet.
+Lakbay is a portfolio-ready React web application for Philippine road-trip budgeting. It combines route distance, vehicle fuel efficiency, fuel prices, tolls, parking, additional expenses and passenger splitting into one travel-cost workflow.
 
-## Phase 10 additions
+## Final feature set
 
-- Toll planner with multiple named toll/expressway segments
-- Quick-add Philippine expressway labels (rates remain user-entered so stale prices are never assumed)
-- Automatic round-trip toll multiplication
-- Flexible additional trip expenses for food, accommodation, ferry and custom costs
-- Parking and traveler counts remain first-class inputs
-- Live budget breakdown and fuel-share insight
-- Toll and expense line items are saved with each Firestore trip
-- Reusing a saved trip restores its toll and expense breakdown
-- Backward compatible with Phase 4–6 saved trips
-- Existing Firebase Authentication, Firestore Garage, saved Trips and map routing preserved
+- Firebase Email/Password authentication
+- Firestore-backed user-specific vehicles and trips
+- My Garage with default vehicles and fuel-efficiency profiles
+- OpenStreetMap/Leaflet map visualization
+- Automatic Philippine place lookup and road-routing distance
+- Manual-distance fallback when public routing is unavailable
+- Fuel, toll, parking and flexible expense calculations
+- Multiple named toll segments with user-entered current prices
+- Saved trip history with search, details, reuse and delete
+- Saved-vehicle cost comparison and cheapest-vehicle ranking
+- Firestore-powered monthly analytics and spending breakdowns
+- Explainable rule-based Smart Insights with no paid AI API
+- Shared trips with participant names and driver discounts
+- Persistent default fuel price and vehicle preferences
+- Offline/network status feedback
+- Firestore sync error handling with optimistic rollback
+- Loading skeletons, empty states and fatal UI error boundary
+- Accessibility focus states, skip link and reduced-motion support
+- Responsive desktop/mobile navigation
+- Vercel SPA deployment configuration
+- Firestore security rules included in the repository
+
+## Tech stack
+
+- React + TypeScript
+- Vite
+- React Router
+- Firebase Authentication
+- Cloud Firestore
+- Leaflet + React Leaflet
+- OpenStreetMap / Nominatim place search
+- OSRM public routing service
+- Lucide React icons
 
 ## Run locally
+
+1. Extract the project.
+2. Copy `.env.example` to `.env`.
+3. Paste your Firebase Web App configuration into `.env`.
+4. Install dependencies and start Vite:
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Firebase
+For a production check:
 
-Copy your existing Phase 6 `.env` into this project (or copy `.env.example` to `.env`) and add your Firebase Web App configuration. `.env` remains excluded from Git.
+```bash
+npm run check
+```
 
-## Firestore structure
+This runs TypeScript checking and the Vite production build.
+
+## Firebase setup
+
+Enable **Email/Password** under Firebase Authentication and create a Cloud Firestore database.
+
+Environment variables:
+
+```env
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_PROJECT_ID=
+VITE_FIREBASE_STORAGE_BUCKET=
+VITE_FIREBASE_MESSAGING_SENDER_ID=
+VITE_FIREBASE_APP_ID=
+```
+
+`.env` is intentionally ignored by Git. Commit `.env.example`, never your local `.env`.
+
+### Firestore structure
 
 ```text
 users/{uid}/vehicles/{vehicleId}
 users/{uid}/trips/{tripId}
 ```
 
-Phase 10 saves optional `tollItems` and `expenseItems` arrays on new trip records while keeping the previous summary fields for backward compatibility.
+### Firestore rules
+
+`firestore.rules` restricts vehicle and trip data to the authenticated owner. You can paste those rules into **Firebase Console → Firestore Database → Rules**, or deploy them with the Firebase CLI after configuring your Firebase project.
+
+## Mapping and routing note
+
+Lakbay currently uses public OpenStreetMap/Nominatim/OSRM services so the portfolio project can run without a paid map key. Public services can have availability and usage limits, so Lakbay keeps a manual-distance fallback. For a high-traffic commercial deployment, replace these public endpoints with a production routing/geocoding provider.
 
 ## Toll-rate note
 
-Phase 10 intentionally does not hard-code toll prices. Toll schedules can change, so Lakbay provides named toll segments and lets the user enter the current amount. A future production integration can replace this with a maintained toll-rate data source without changing the trip-calculation model.
+Lakbay intentionally does not hard-code Philippine toll prices because rates can change. Users add the relevant toll segments and enter the current amount. A future live toll-data integration can replace the manual values without changing the trip-cost model.
 
+## Deploy to Vercel
 
-## Phase 10 — Vehicle Comparison
+1. Push this project to GitHub.
+2. Import the repository into Vercel.
+3. Add all `VITE_FIREBASE_*` variables in **Project Settings → Environment Variables**.
+4. Deploy.
 
-Phase 10 compares every saved vehicle against the current trip. The ranking uses the current route distance, fuel price, tolls, parking, extra expenses, passenger count, and each vehicle's saved fuel efficiency. Users can switch vehicles directly from the comparison table and immediately see the calculator update.
+`vercel.json` includes the SPA rewrite needed for React Router routes such as `/plan-trip`, `/garage` and `/analytics`.
 
+## Git hygiene
 
-## Phase 10 — Firestore-powered analytics
+The repository includes `.gitignore` rules for dependencies, builds, local environment values, logs and common editor/OS files. Do not commit `node_modules`, `dist` or `.env`.
 
-The Analytics page now calculates live metrics from the signed-in user's saved Firestore trips. It includes monthly spending, distance traveled, fuel used, average trip cost, six-month spending trends, expense-category breakdowns, vehicle usage rankings, and the selected month's most expensive trip. No extra chart library is required; the charts are responsive CSS components.
+## Final phase
 
-Analytics updates automatically whenever saved trips change. Older trips remain supported, including records created before detailed Phase 7 expense items were added.
-
-
-## Phase 10 — Smart Insights
-
-Phase 10 adds a transparent, rule-based recommendation engine to Analytics. It detects expensive trips, fuel-heavy routes, passenger-sharing opportunities, repeat routes, potential savings from more efficient saved vehicles, and cost-efficient travel patterns. No paid AI API is required.
-
-
-## Phase 11 — Shared Trips
-
-Phase 11 adds group-trip cost splitting to Plan Trip. Enable Shared Trip, add participants, select the driver, and choose a 0%, 25%, 50%, or 100% driver discount. Lakbay redistributes the remaining cost automatically and saves the contribution breakdown with the trip in Firestore.
-
-Shared trips remain compatible with older saved trips that do not contain participant data.
+Phase 12 is the final core implementation and production-polish pass. Future work can be treated as optional product expansion rather than required project completion.

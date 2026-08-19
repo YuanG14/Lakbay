@@ -13,7 +13,7 @@ const emptyForm: VehicleInput = {
 };
 
 export default function Garage() {
-  const { vehicles, addVehicle, updateVehicle, deleteVehicle, setDefaultVehicle } = useVehicles();
+  const { vehicles, loading, syncError, clearSyncError, addVehicle, updateVehicle, deleteVehicle, setDefaultVehicle } = useVehicles();
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Vehicle | null>(null);
   const [form, setForm] = useState<VehicleInput>(emptyForm);
@@ -91,6 +91,8 @@ export default function Garage() {
         action={<button className="primary-btn" onClick={openAdd}><Plus size={17} /> Add vehicle</button>}
       />
 
+      {syncError && <div className="sync-alert" role="alert"><span>{syncError}</span><button type="button" onClick={clearSyncError}>Dismiss</button></div>}
+
       {notice && (
         <div className="garage-notice">
           <Check size={16} /> <span>{notice}</span>
@@ -104,7 +106,9 @@ export default function Garage() {
         <div className="garage-summary-card"><Star /><span>Default vehicle</span><strong>{vehicles.find((v) => v.isDefault)?.name ?? 'None yet'}</strong></div>
       </section>
 
-      {vehicles.length ? (
+      {loading ? (
+        <section className="vehicle-grid garage-grid" aria-label="Loading vehicles">{[1,2,3].map((item) => <div className="vehicle-card skeleton-card" key={item}><span className="skeleton-line wide"/><span className="skeleton-line"/><span className="skeleton-block"/></div>)}</section>
+      ) : vehicles.length ? (
         <section className="vehicle-grid garage-grid">
           {vehicles.map((vehicle) => (
             <article className={`vehicle-card ${vehicle.isDefault ? 'featured' : ''}`} key={vehicle.id}>
