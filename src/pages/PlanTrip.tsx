@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   ArrowRight,
   Calculator,
@@ -11,9 +12,12 @@ import {
   ReceiptText,
   Route,
   UsersRound,
+  Save,
+  CheckCircle2,
 } from 'lucide-react';
 import PageHeader from '../components/ui/PageHeader';
 import { useVehicles } from '../context/VehicleContext';
+import { useTrips } from '../context/TripContext';
 
 type TripType = 'round' | 'oneway';
 
@@ -27,6 +31,8 @@ const peso = new Intl.NumberFormat('en-PH', {
 const number = new Intl.NumberFormat('en-PH', { maximumFractionDigits: 2 });
 
 export default function PlanTrip() {
+  const [searchParams] = useSearchParams();
+  const { addTrip, getTrip } = useTrips();
   const [origin, setOrigin] = useState('Batangas City');
   const [destination, setDestination] = useState('Alabang, Muntinlupa');
   const { vehicles, defaultVehicle } = useVehicles();
@@ -42,11 +48,31 @@ export default function PlanTrip() {
   const [passengers, setPassengers] = useState(4);
   const [hasCalculated, setHasCalculated] = useState(true);
   const [error, setError] = useState('');
+  const [savedMessage, setSavedMessage] = useState('');
 
   useEffect(() => {
     const selected = vehicles.find((item) => item.id === vehicleId);
     if (selected) setEfficiency(selected.efficiency);
   }, [vehicleId, vehicles]);
+
+  useEffect(() => {
+    const reuseId = searchParams.get('reuse');
+    if (!reuseId) return;
+    const trip = getTrip(reuseId);
+    if (!trip) return;
+    setOrigin(trip.origin);
+    setDestination(trip.destination);
+    setVehicleId(vehicles.some((vehicle) => vehicle.id === trip.vehicleId) ? trip.vehicleId : 'custom');
+    setTripType(trip.tripType);
+    setDistance(trip.oneWayDistance);
+    setEfficiency(trip.efficiency);
+    setFuelPrice(trip.fuelPrice);
+    setToll(trip.tollOneWay);
+    setParking(trip.parking);
+    setOther(trip.other);
+    setPassengers(trip.passengers);
+    setSavedMessage('Previous trip loaded. Adjust anything and calculate again.');
+  }, [searchParams, getTrip, vehicles]);
 
   const vehicleName = selectedVehicle?.name ?? 'Custom vehicle';
 
@@ -67,6 +93,7 @@ export default function PlanTrip() {
 
   function calculate(e: FormEvent) {
     e.preventDefault();
+    setSavedMessage('');
     if (!origin.trim() || !destination.trim()) {
       setError('Please enter both an origin and destination.');
       return;
@@ -79,6 +106,22 @@ export default function PlanTrip() {
     setHasCalculated(true);
   }
 
+  function saveTrip() {
+    if (!origin.trim() || !destination.trim() || result.totalDistance <= 0) {
+      setError('Calculate a valid trip before saving it.');
+      return;
+    }
+    addTrip({
+      origin: origin.trim(), destination: destination.trim(), vehicleId, vehicleName, tripType,
+      oneWayDistance: distance, totalDistance: result.totalDistance, efficiency, fuelPrice,
+      fuelUsed: result.fuelUsed, fuelCost: result.fuelCost, tollOneWay: toll, tollCost: result.tollCost,
+      parking: result.parkingCost, other: result.otherCost, passengers, total: result.total,
+      perPerson: result.perPerson, costPerKm: result.costPerKm,
+    });
+    setError('');
+    setSavedMessage('Trip saved to My Trips.');
+  }
+
   return (
     <div className="page-stack">
       <PageHeader
@@ -86,6 +129,8 @@ export default function PlanTrip() {
         title="Build your trip estimate"
         subtitle="Estimate fuel, tolls, parking, and the amount each traveler should prepare."
       />
+
+      {savedMessage && <div className="trip-save-notice"><CheckCircle2 size={17}/><span>{savedMessage}</span></div>}
 
       <section className="calculator-layout">
         <form className="panel form-panel calculator-form" onSubmit={calculate}>
@@ -174,6 +219,7 @@ export default function PlanTrip() {
               <div><span>Total distance</span><strong>{number.format(result.totalDistance)} km</strong></div>
               <div><span>Cost per km</span><strong>{peso.format(result.costPerKm)}</strong></div>
             </div>
+            <button className="result-save-btn" type="button" onClick={saveTrip}><Save size={17}/> Save this trip</button>
           </div>
 
           <div className="panel calculation-note">
