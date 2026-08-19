@@ -1,6 +1,6 @@
 import { FormEvent, useState } from 'react';
-import { Navigate, useSearchParams } from 'react-router-dom';
-import { ArrowRight, Eye, EyeOff, Lock, Mail, Route, UserRound } from 'lucide-react';
+import { Link, Navigate, useSearchParams } from 'react-router-dom';
+import { ArrowLeft, ArrowRight, Eye, EyeOff, Lock, Mail, Route, UserRound } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 function friendlyAuthError(error: unknown) {
@@ -46,6 +46,12 @@ export default function Auth() {
     <div className="auth-page">
       <div className="auth-brand"><div className="brand-mark"><Route size={24}/></div><div><div className="brand-name">Lakbay</div><div className="brand-sub">Smart Trip Planner</div></div></div>
       <div className="auth-card">
+        {mode === 'signup' && (
+          <Link to="/" className="auth-back-link">
+            <ArrowLeft size={17} />
+            <span>Back to landing page</span>
+          </Link>
+        )}
         <span className="section-kicker">{mode === 'login' ? 'Welcome back' : 'Create account'}</span>
         <h1>{mode === 'login' ? 'Continue your journey' : 'Start planning smarter trips'}</h1>
         <p>{mode === 'login' ? 'Sign in to access your vehicles, saved trips and analytics.' : 'Your garage and trip history will sync to your Firebase account.'}</p>

@@ -1,6 +1,6 @@
 import { CarFront, ChartNoAxesCombined, Compass, LayoutDashboard, LogOut, Menu, Route, Settings, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import NetworkStatus from '../ui/NetworkStatus';
 
@@ -17,6 +17,7 @@ export default function AppShell() {
   const [open, setOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const fullName = user?.displayName?.trim() || user?.email?.split('@')[0] || 'Traveler';
   const firstName = fullName.split(/\s+/)[0] || 'Traveler';
   const initials = firstName.slice(0, 1).toUpperCase();
@@ -40,7 +41,12 @@ export default function AppShell() {
   async function handleLogout() {
     if (signingOut) return;
     setSigningOut(true);
-    try { await logout(); } finally { setSigningOut(false); }
+    try {
+      await logout();
+      navigate('/', { replace: true });
+    } finally {
+      setSigningOut(false);
+    }
   }
 
   return (
