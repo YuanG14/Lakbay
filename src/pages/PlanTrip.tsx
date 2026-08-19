@@ -4,22 +4,38 @@ import {
   ArrowRight,
   Calculator,
   CarFront,
+  CheckCircle2,
   CircleDollarSign,
+  Clock3,
   Fuel,
+  LoaderCircle,
+  LocateFixed,
   MapPin,
   Navigation,
   ParkingCircle,
   ReceiptText,
   Route,
-  UsersRound,
   Save,
-  CheckCircle2,
+  UsersRound,
 } from 'lucide-react';
 import PageHeader from '../components/ui/PageHeader';
+import RouteMap, { LatLng } from '../components/RouteMap';
 import { useVehicles } from '../context/VehicleContext';
 import { useTrips } from '../context/TripContext';
 
 type TripType = 'round' | 'oneway';
+
+type GeocodeResult = {
+  lat: string;
+  lon: string;
+  display_name: string;
+};
+
+type OsrmRoute = {
+  distance: number;
+  duration: number;
+  geometry: { coordinates: [number, number][] };
+};
 
 const peso = new Intl.NumberFormat('en-PH', {
   style: 'currency',
@@ -30,12 +46,51 @@ const peso = new Intl.NumberFormat('en-PH', {
 
 const number = new Intl.NumberFormat('en-PH', { maximumFractionDigits: 2 });
 
+async function geocodePlace(query: string): Promise<{ coords: LatLng; label: string } | null> {
+  const url = new URL('https://nominatim.openstreetmap.org/search');
+  url.searchParams.set('q', query);
+  url.searchParams.set('format', 'jsonv2');
+  url.searchParams.set('limit', '1');
+  url.searchParams.set('countrycodes', 'ph');
+  url.searchParams.set('addressdetails', '1');
+
+  const response = await fetch(url.toString(), {
+    headers: { 'Accept-Language': 'en-PH,en;q=0.9' },
+  });
+  if (!response.ok) throw new Error('Place search is temporarily unavailable.');
+  const results = (await response.json()) as GeocodeResult[];
+  if (!results[0]) return null;
+  return {
+    coords: [Number(results[0].lat), Number(results[0].lon)],
+    label: results[0].display_name,
+  };
+}
+
+async function fetchDrivingRoute(origin: LatLng, destination: LatLng): Promise<OsrmRoute> {
+  const coordinates = `${origin[1]},${origin[0]};${destination[1]},${destination[0]}`;
+  const url = `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=geojson&steps=false`;
+  const response = await fetch(url);
+  if (!response.ok) throw new Error('Road routing is temporarily unavailable.');
+  const data = await response.json();
+  if (data.code !== 'Ok' || !data.routes?.[0]) throw new Error('No drivable route was found for these places.');
+  return data.routes[0] as OsrmRoute;
+}
+
+function formatDuration(seconds: number) {
+  const totalMinutes = Math.max(1, Math.round(seconds / 60));
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (!hours) return `${minutes} min`;
+  return `${hours} hr ${minutes ? `${minutes} min` : ''}`.trim();
+}
+
 export default function PlanTrip() {
   const [searchParams] = useSearchParams();
   const { addTrip, getTrip } = useTrips();
+  const { vehicles, defaultVehicle } = useVehicles();
+
   const [origin, setOrigin] = useState('Batangas City');
   const [destination, setDestination] = useState('Alabang, Muntinlupa');
-  const { vehicles, defaultVehicle } = useVehicles();
   const [vehicleId, setVehicleId] = useState(defaultVehicle?.id ?? 'custom');
   const [tripType, setTripType] = useState<TripType>('round');
   const [distance, setDistance] = useState(105);
@@ -49,6 +104,15 @@ export default function PlanTrip() {
   const [hasCalculated, setHasCalculated] = useState(true);
   const [error, setError] = useState('');
   const [savedMessage, setSavedMessage] = useState('');
+
+  const [routeLoading, setRouteLoading] = useState(false);
+  const [routeError, setRouteError] = useState('');
+  const [routeOrigin, setRouteOrigin] = useState<LatLng | null>(null);
+  const [routeDestination, setRouteDestination] = useState<LatLng | null>(null);
+  const [routeLine, setRouteLine] = useState<LatLng[]>([]);
+  const [routeDuration, setRouteDuration] = useState(0);
+  const [routeResolved, setRouteResolved] = useState(false);
+  const [manualDistance, setManualDistance] = useState(false);
 
   useEffect(() => {
     const selected = vehicles.find((item) => item.id === vehicleId);
@@ -71,7 +135,9 @@ export default function PlanTrip() {
     setParking(trip.parking);
     setOther(trip.other);
     setPassengers(trip.passengers);
-    setSavedMessage('Previous trip loaded. Adjust anything and calculate again.');
+    setManualDistance(true);
+    setRouteResolved(false);
+    setSavedMessage('Previous trip loaded. Find the route again or use its saved distance.');
   }, [searchParams, getTrip, vehicles]);
 
   const vehicleName = selectedVehicle?.name ?? 'Custom vehicle';
@@ -90,6 +156,48 @@ export default function PlanTrip() {
 
     return { totalDistance, fuelUsed, fuelCost, tollCost, parkingCost, otherCost, total, perPerson, costPerKm };
   }, [distance, efficiency, fuelPrice, toll, parking, other, passengers, tripType]);
+
+  async function findRoute() {
+    setSavedMessage('');
+    setRouteError('');
+    setError('');
+    if (!origin.trim() || !destination.trim()) {
+      setRouteError('Enter an origin and destination first.');
+      return;
+    }
+    if (origin.trim().toLowerCase() === destination.trim().toLowerCase()) {
+      setRouteError('Origin and destination must be different.');
+      return;
+    }
+
+    setRouteLoading(true);
+    try {
+      const [originPlace, destinationPlace] = await Promise.all([
+        geocodePlace(origin.trim()),
+        geocodePlace(destination.trim()),
+      ]);
+      if (!originPlace) throw new Error(`Could not find “${origin.trim()}”. Try adding the city or province.`);
+      if (!destinationPlace) throw new Error(`Could not find “${destination.trim()}”. Try adding the city or province.`);
+
+      const route = await fetchDrivingRoute(originPlace.coords, destinationPlace.coords);
+      const routeKm = route.distance / 1000;
+      const line = route.geometry.coordinates.map(([lng, lat]) => [lat, lng] as LatLng);
+
+      setRouteOrigin(originPlace.coords);
+      setRouteDestination(destinationPlace.coords);
+      setRouteLine(line);
+      setDistance(Number(routeKm.toFixed(1)));
+      setRouteDuration(route.duration);
+      setRouteResolved(true);
+      setManualDistance(false);
+      setHasCalculated(true);
+    } catch (routeFailure) {
+      setRouteError(routeFailure instanceof Error ? routeFailure.message : 'Unable to find that route right now.');
+      setRouteResolved(false);
+    } finally {
+      setRouteLoading(false);
+    }
+  }
 
   function calculate(e: FormEvent) {
     e.preventDefault();
@@ -127,25 +235,51 @@ export default function PlanTrip() {
       <PageHeader
         eyebrow="Plan Trip"
         title="Build your trip estimate"
-        subtitle="Estimate fuel, tolls, parking, and the amount each traveler should prepare."
+        subtitle="Find the driving route automatically, then estimate fuel, tolls, parking, and each traveler’s share."
       />
 
       {savedMessage && <div className="trip-save-notice"><CheckCircle2 size={17}/><span>{savedMessage}</span></div>}
+
+      <section className="route-planner-panel panel">
+        <div className="route-planner-fields">
+          <div className="route-planner-heading">
+            <span className="section-icon"><LocateFixed size={18}/></span>
+            <div><strong>Automatic route finder</strong><span>Search Philippine places and calculate the road distance for your estimate.</span></div>
+          </div>
+          <div className="route-search-grid">
+            <Field label="Origin" icon={<MapPin size={18} />}>
+              <input value={origin} onChange={(e) => { setOrigin(e.target.value); setRouteResolved(false); }} placeholder="Batangas City" />
+            </Field>
+            <Field label="Destination" icon={<Navigation size={18} />}>
+              <input value={destination} onChange={(e) => { setDestination(e.target.value); setRouteResolved(false); }} placeholder="Alabang, Muntinlupa" />
+            </Field>
+            <button className="primary-btn route-find-btn" type="button" onClick={findRoute} disabled={routeLoading}>
+              {routeLoading ? <LoaderCircle className="spin" size={18}/> : <Route size={18}/>} {routeLoading ? 'Finding route…' : 'Find route'}
+            </button>
+          </div>
+          {routeError && <div className="route-inline-error">{routeError} <button type="button" onClick={() => setManualDistance(true)}>Enter distance manually</button></div>}
+          {routeResolved && (
+            <div className="route-found-summary">
+              <span><Route size={16}/><strong>{number.format(distance)} km</strong> one way</span>
+              <span><Clock3 size={16}/><strong>{formatDuration(routeDuration)}</strong> estimated drive</span>
+              <span className="route-source-pill">Road route found</span>
+            </div>
+          )}
+        </div>
+        <div className="route-map-column">
+          <RouteMap origin={routeOrigin} destination={routeDestination} route={routeLine}/>
+          {!routeResolved && !routeLoading && <div className="map-empty-overlay"><Navigation size={24}/><strong>Your route will appear here</strong><span>Enter two places and click Find route.</span></div>}
+        </div>
+      </section>
 
       <section className="calculator-layout">
         <form className="panel form-panel calculator-form" onSubmit={calculate}>
           <div className="calculator-section">
             <div className="calculator-section-title">
-              <span className="section-icon"><Route size={17} /></span>
-              <div><strong>Route details</strong><span>Start with the trip basics.</span></div>
+              <span className="section-icon"><CarFront size={17} /></span>
+              <div><strong>Trip setup</strong><span>Choose a vehicle and whether you are returning to the origin.</span></div>
             </div>
             <div className="field-grid">
-              <Field label="Origin" icon={<MapPin size={18} />}>
-                <input value={origin} onChange={(e) => setOrigin(e.target.value)} placeholder="Batangas City" />
-              </Field>
-              <Field label="Destination" icon={<Navigation size={18} />}>
-                <input value={destination} onChange={(e) => setDestination(e.target.value)} placeholder="Alabang, Muntinlupa" />
-              </Field>
               <Field label="Vehicle" icon={<CarFront size={18} />}>
                 <select value={vehicleId} onChange={(e) => setVehicleId(e.target.value)}>
                   {vehicles.map((savedVehicle) => (
@@ -171,10 +305,19 @@ export default function PlanTrip() {
           <div className="calculator-section">
             <div className="calculator-section-title">
               <span className="section-icon"><Fuel size={17} /></span>
-              <div><strong>Fuel estimate</strong><span>Use your expected one-way distance and vehicle efficiency.</span></div>
+              <div><strong>Fuel estimate</strong><span>Route distance is filled automatically after Find route.</span></div>
             </div>
             <div className="field-grid three-fields">
-              <NumberField label="One-way distance" value={distance} setValue={setDistance} suffix="km" min={0} />
+              <label>
+                <span>One-way distance</span>
+                <div className="number-input-shell route-distance-field">
+                  <input type="number" min="0" step="0.1" value={distance} disabled={!manualDistance && routeResolved} onChange={(e) => setDistance(Number(e.target.value))} />
+                  <span className="input-affix suffix">km</span>
+                </div>
+                <button className="manual-distance-link" type="button" onClick={() => setManualDistance((current) => !current)}>
+                  {manualDistance ? 'Use automatic route instead' : 'Edit distance manually'}
+                </button>
+              </label>
               <NumberField label="Fuel efficiency" value={efficiency} setValue={setEfficiency} suffix="km/L" min={0} step="0.1" disabled={!!selectedVehicle} />
               <NumberField label="Fuel price" value={fuelPrice} setValue={setFuelPrice} prefix="₱" suffix="/L" min={0} step="0.01" />
             </div>
@@ -185,7 +328,7 @@ export default function PlanTrip() {
           <div className="calculator-section">
             <div className="calculator-section-title">
               <span className="section-icon"><ReceiptText size={17} /></span>
-              <div><strong>Other trip costs</strong><span>Toll is treated as one-way and doubled for a round trip.</span></div>
+              <div><strong>Other trip costs</strong><span>Toll remains manually editable in this phase and is doubled for round trips.</span></div>
             </div>
             <div className="field-grid two-fields">
               <NumberField label="One-way toll" value={toll} setValue={setToll} prefix="₱" min={0} step="0.01" />
@@ -224,6 +367,7 @@ export default function PlanTrip() {
 
           <div className="panel calculation-note">
             <div className="section-kicker">How Lakbay calculates</div>
+            <p><strong>Route distance</strong> comes from the road route between the two selected places.</p>
             <p><strong>Fuel cost</strong> = total distance ÷ fuel efficiency × fuel price.</p>
             <p><strong>Total cost</strong> = fuel + tolls + parking + other expenses.</p>
             <p><strong>Per person</strong> = total trip cost ÷ number of travelers.</p>

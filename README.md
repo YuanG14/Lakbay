@@ -1,36 +1,38 @@
-# Lakbay — Phase 5
+# Lakbay — Phase 6
 
-Smart Trip Cost Planner built with React, Vite, TypeScript and Firebase.
+Smart Trip Cost Planner built with React, Vite, TypeScript, Firebase, Firestore, OpenStreetMap and Leaflet.
 
-## Phase 5 features
-- Firebase Email/Password Authentication
-- Per-user Firestore vehicle storage
-- Per-user Firestore saved-trip storage
-- Signed-in user profile in the app shell
-- Logout support
-- Firebase configuration guard (no white screen when `.env` is missing)
-- Existing Phase 1–4 trip calculator, garage and trip history flows preserved
+## Phase 6 additions
 
-## Setup
-1. Run `npm install`.
-2. Create a Firebase project and add a Web App.
-3. In Firebase Authentication, enable **Email/Password**.
-4. Create a **Cloud Firestore** database.
-5. Copy `.env.example` to `.env` and insert your Firebase Web App config values.
-6. Run `npm run dev`.
+- Interactive road map on Plan Trip
+- Philippine place search for origin and destination
+- Automatic driving-route lookup
+- Automatic one-way road distance
+- Estimated driving duration
+- Map markers and route polyline
+- Manual distance fallback
+- Existing Firebase Authentication, Firestore Garage, saved Trips and calculator preserved
 
-## Recommended Firestore rules
-Use authenticated, user-scoped rules while developing:
+## Run locally
 
-```
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /users/{userId}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-  }
-}
+```bash
+npm install
+npm run dev
 ```
 
-Never commit `.env`. The provided `.gitignore` already excludes environment files.
+## Firebase
+
+Copy `.env.example` to `.env` and add your Firebase Web App configuration. Keep `.env` out of Git.
+
+## Firestore structure
+
+```text
+users/{uid}/vehicles/{vehicleId}
+users/{uid}/trips/{tripId}
+```
+
+Use Firestore Security Rules that only allow an authenticated user to access data under their own UID.
+
+## Map and routing note
+
+Phase 6 uses public OpenStreetMap-compatible services for development/demo routing and geocoding, so no extra API key is required. A manual distance input remains available if public routing is unavailable. For a production app with significant traffic, move to a dedicated hosted geocoding/routing provider or your own service.
