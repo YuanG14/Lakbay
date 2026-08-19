@@ -1,17 +1,19 @@
-# Lakbay — Phase 6
+# Lakbay — Phase 7
 
 Smart Trip Cost Planner built with React, Vite, TypeScript, Firebase, Firestore, OpenStreetMap and Leaflet.
 
-## Phase 6 additions
+## Phase 7 additions
 
-- Interactive road map on Plan Trip
-- Philippine place search for origin and destination
-- Automatic driving-route lookup
-- Automatic one-way road distance
-- Estimated driving duration
-- Map markers and route polyline
-- Manual distance fallback
-- Existing Firebase Authentication, Firestore Garage, saved Trips and calculator preserved
+- Toll planner with multiple named toll/expressway segments
+- Quick-add Philippine expressway labels (rates remain user-entered so stale prices are never assumed)
+- Automatic round-trip toll multiplication
+- Flexible additional trip expenses for food, accommodation, ferry and custom costs
+- Parking and traveler counts remain first-class inputs
+- Live budget breakdown and fuel-share insight
+- Toll and expense line items are saved with each Firestore trip
+- Reusing a saved trip restores its toll and expense breakdown
+- Backward compatible with Phase 4–6 saved trips
+- Existing Firebase Authentication, Firestore Garage, saved Trips and map routing preserved
 
 ## Run locally
 
@@ -22,7 +24,7 @@ npm run dev
 
 ## Firebase
 
-Copy `.env.example` to `.env` and add your Firebase Web App configuration. Keep `.env` out of Git.
+Copy your existing Phase 6 `.env` into this project (or copy `.env.example` to `.env`) and add your Firebase Web App configuration. `.env` remains excluded from Git.
 
 ## Firestore structure
 
@@ -31,8 +33,8 @@ users/{uid}/vehicles/{vehicleId}
 users/{uid}/trips/{tripId}
 ```
 
-Use Firestore Security Rules that only allow an authenticated user to access data under their own UID.
+Phase 7 saves optional `tollItems` and `expenseItems` arrays on new trip records while keeping the previous summary fields for backward compatibility.
 
-## Map and routing note
+## Toll-rate note
 
-Phase 6 uses public OpenStreetMap-compatible services for development/demo routing and geocoding, so no extra API key is required. A manual distance input remains available if public routing is unavailable. For a production app with significant traffic, move to a dedicated hosted geocoding/routing provider or your own service.
+Phase 7 intentionally does not hard-code toll prices. Toll schedules can change, so Lakbay provides named toll segments and lets the user enter the current amount. A future production integration can replace this with a maintained toll-rate data source without changing the trip-calculation model.

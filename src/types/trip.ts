@@ -1,5 +1,20 @@
 export type TripType = 'round' | 'oneway';
 
+export type TollItem = {
+  id: string;
+  label: string;
+  oneWayAmount: number;
+};
+
+export type ExpenseCategory = 'food' | 'accommodation' | 'ferry' | 'parking' | 'other';
+
+export type TripExpense = {
+  id: string;
+  label: string;
+  category: ExpenseCategory;
+  amount: number;
+};
+
 export interface SavedTrip {
   id: string;
   origin: string;
@@ -21,5 +36,7 @@ export interface SavedTrip {
   total: number;
   perPerson: number;
   costPerKm: number;
+  tollItems?: TollItem[];
+  expenseItems?: TripExpense[];
   createdAt: string;
 }
