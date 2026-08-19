@@ -336,3 +336,56 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
   .landing-links{gap:42px}
   .landing-actions{gap:26px;margin-left:34px}
 }
+
+/* Landing page motion — subtle, purposeful, and reduced-motion friendly */
+@keyframes landingFadeUp{
+  from{opacity:0;transform:translateY(18px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes landingFadeIn{
+  from{opacity:0}
+  to{opacity:1}
+}
+@keyframes landingNavDrop{
+  from{opacity:0;transform:translateY(-10px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.landing-nav{animation:landingNavDrop .45s cubic-bezier(.2,.8,.2,1) backwards}
+.landing-hero-copy{animation:landingFadeUp .65s cubic-bezier(.2,.8,.2,1) .05s backwards}
+.landing-preview{animation:landingFadeUp .7s cubic-bezier(.2,.8,.2,1) .16s backwards;transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease}
+.landing-preview:hover{transform:translateY(-4px);box-shadow:0 34px 90px rgba(29,75,58,.16);border-color:#c9ded4}
+
+.landing-reveal{opacity:0;transform:translateY(22px);transition:opacity .58s ease,transform .58s cubic-bezier(.2,.8,.2,1)}
+.landing-reveal.is-visible{opacity:1;transform:translateY(0)}
+
+.landing-links a,.landing-text-btn{position:relative}
+.landing-links a:after,.landing-text-btn:after{content:"";position:absolute;left:0;right:0;bottom:-7px;height:2px;border-radius:999px;background:var(--green);transform:scaleX(0);transform-origin:center;transition:transform .22s ease}
+.landing-links a:hover:after,.landing-text-btn:hover:after{transform:scaleX(1)}
+
+.landing-primary-btn svg{transition:transform .22s ease}
+.landing-primary-btn:hover svg{transform:translateX(4px)}
+.landing-secondary-btn{transition:transform .22s ease,border-color .22s ease,color .22s ease,box-shadow .22s ease}
+.landing-secondary-btn:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(29,75,58,.07)}
+
+.landing-proof-strip>div{transition:background .22s ease,transform .22s ease}
+.landing-proof-strip>div:hover{background:#f7fbf9;transform:translateY(-2px)}
+
+.landing-feature-card{transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}
+.landing-feature-card:hover{transform:translateY(-5px);box-shadow:0 18px 38px rgba(30,69,54,.09);border-color:#c9ded4}
+.landing-feature-card>span{transition:transform .25s ease,background .25s ease}
+.landing-feature-card:hover>span{transform:scale(1.06) rotate(-2deg);background:#def1e7}
+
+.landing-steps article{transition:transform .25s ease,background .25s ease,border-color .25s ease}
+.landing-steps article:hover{transform:translateY(-5px);background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2)}
+.landing-steps article>span{transition:transform .25s ease}
+.landing-steps article:hover>span{transform:scale(1.07)}
+
+.landing-why-card{transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}
+.landing-why-card:hover{transform:translateY(-3px);box-shadow:0 18px 50px rgba(29,75,58,.08);border-color:#c8ddd3}
+.preview-cost-card{transition:transform .24s ease,box-shadow .24s ease}
+.landing-preview:hover .preview-cost-card{transform:translateY(-2px);box-shadow:0 14px 28px rgba(4,67,47,.16)}
+
+@media(max-width:700px){
+  .landing-preview:hover,.landing-feature-card:hover,.landing-steps article:hover,.landing-why-card:hover,.landing-proof-strip>div:hover{transform:none}
+}

@@ -12,7 +12,7 @@ import {
   UsersRound,
   X,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -54,6 +54,31 @@ export default function Landing() {
   const [menuOpen, setMenuOpen] = useState(false);
   const primaryHref = user ? '/dashboard' : '/auth?mode=signup';
   const primaryLabel = user ? 'Open dashboard' : 'Start planning free';
+
+  useEffect(() => {
+    const elements = Array.from(document.querySelectorAll<HTMLElement>('.landing-reveal'));
+    if (!elements.length) return;
+
+    if (!('IntersectionObserver' in window)) {
+      elements.forEach((element) => element.classList.add('is-visible'));
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12, rootMargin: '0px 0px -50px 0px' },
+    );
+
+    elements.forEach((element) => observer.observe(element));
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <div className="landing-page">
@@ -132,14 +157,14 @@ export default function Landing() {
           </div>
         </section>
 
-        <section className="landing-proof-strip" aria-label="Lakbay capabilities">
+        <section className="landing-proof-strip landing-reveal" aria-label="Lakbay capabilities">
           <div><strong>Route</strong><span>Distance & travel time</span></div>
           <div><strong>Garage</strong><span>Saved vehicle profiles</span></div>
           <div><strong>Expenses</strong><span>Fuel, tolls & extras</span></div>
           <div><strong>Insights</strong><span>Trip history & analytics</span></div>
         </section>
 
-        <section className="landing-section" id="features">
+        <section className="landing-section landing-reveal" id="features">
           <div className="landing-section-heading">
             <span className="section-kicker">Everything in one place</span>
             <h2>More useful than a basic fuel calculator.</h2>
@@ -156,7 +181,7 @@ export default function Landing() {
           </div>
         </section>
 
-        <section className="landing-how" id="how-it-works">
+        <section className="landing-how landing-reveal" id="how-it-works">
           <div className="landing-how-copy">
             <span className="section-kicker">Simple workflow</span>
             <h2>Plan a drive in three steps.</h2>
@@ -169,7 +194,7 @@ export default function Landing() {
           </div>
         </section>
 
-        <section className="landing-why" id="why-lakbay">
+        <section className="landing-why landing-reveal" id="why-lakbay">
           <div className="landing-why-card">
             <div>
               <span className="section-kicker">Made for practical planning</span>
@@ -182,7 +207,7 @@ export default function Landing() {
         </section>
       </main>
 
-      <footer className="landing-footer">
+      <footer className="landing-footer landing-reveal">
         <Link to="/" className="landing-brand">
           <span className="landing-brand-mark small"><Route size={19} /></span>
           <span><strong>Lakbay</strong><small>Smart Trip Planner</small></span>
