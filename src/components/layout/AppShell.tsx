@@ -17,8 +17,9 @@ export default function AppShell() {
   const [open, setOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const { user, logout } = useAuth();
-  const displayName = user?.displayName || user?.email?.split('@')[0] || 'Traveler';
-  const initials = displayName.split(' ').filter(Boolean).map((part) => part[0]).join('').slice(0, 2).toUpperCase();
+  const fullName = user?.displayName?.trim() || user?.email?.split('@')[0] || 'Traveler';
+  const firstName = fullName.split(/\s+/)[0] || 'Traveler';
+  const initials = firstName.slice(0, 1).toUpperCase();
 
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : '';
@@ -69,11 +70,10 @@ export default function AppShell() {
         <header className="topbar">
           <button className="icon-btn mobile-menu" onClick={() => setOpen(true)} aria-label="Open navigation"><Menu size={21} /></button>
           <div className="topbar-spacer" />
-          <div className="profile-chip" title={user?.email ?? undefined}>
+          <div className="profile-chip" title={`Signed in as ${firstName}`}>
             <div className="avatar" aria-hidden="true">{initials}</div>
             <div className="profile-copy">
-              <strong>{displayName}</strong>
-              <span>{user?.email}</span>
+              <strong>{firstName}</strong>
             </div>
           </div>
           <button className="icon-btn" disabled={signingOut} onClick={handleLogout} aria-label="Sign out" title="Sign out"><LogOut size={18} /></button>
