@@ -3,13 +3,13 @@ import { useSearchParams } from 'react-router-dom';
 import {
   ArrowRight, Calculator, CarFront, CheckCircle2, CircleDollarSign, Clock3, Fuel,
   Hotel, LoaderCircle, LocateFixed, MapPin, Navigation, ParkingCircle, Plus, ReceiptText,
-  Route, Save, Ship, Soup, Trash2, UsersRound, WalletCards, Trophy, TrendingDown, Sparkles,
+  Route, Save, Ship, Soup, Trash2, UsersRound, WalletCards, Trophy, TrendingDown, Sparkles, UserPlus, Crown,
 } from 'lucide-react';
 import PageHeader from '../components/ui/PageHeader';
 import RouteMap, { LatLng } from '../components/RouteMap';
 import { useVehicles } from '../context/VehicleContext';
 import { useTrips } from '../context/TripContext';
-import { ExpenseCategory, TollItem, TripExpense } from '../types/trip';
+import { ExpenseCategory, SharedTripMember, TollItem, TripExpense } from '../types/trip';
 
 type TripType = 'round' | 'oneway';
 type GeocodeResult = { lat: string; lon: string; display_name: string };
@@ -67,6 +67,14 @@ export default function PlanTrip() {
   const [fuelPrice, setFuelPrice] = useState(78);
   const [parking, setParking] = useState(100);
   const [passengers, setPassengers] = useState(4);
+  const [sharedTrip, setSharedTrip] = useState(false);
+  const [driverDiscount, setDriverDiscount] = useState(25);
+  const [members, setMembers] = useState<SharedTripMember[]>(() => [
+    { id: uid(), name: 'You', isDriver: true, contribution: 0 },
+    { id: uid(), name: 'Traveler 2', isDriver: false, contribution: 0 },
+    { id: uid(), name: 'Traveler 3', isDriver: false, contribution: 0 },
+    { id: uid(), name: 'Traveler 4', isDriver: false, contribution: 0 },
+  ]);
   const [tollItems, setTollItems] = useState<TollItem[]>([{ id: uid(), label: 'Expressway toll', oneWayAmount: 510 }]);
   const [expenseItems, setExpenseItems] = useState<TripExpense[]>([]);
   const [hasCalculated, setHasCalculated] = useState(true);
@@ -86,6 +94,9 @@ export default function PlanTrip() {
     setVehicleId(vehicles.some((vehicle) => vehicle.id === trip.vehicleId) ? trip.vehicleId : 'custom');
     setTripType(trip.tripType); setDistance(trip.oneWayDistance); setEfficiency(trip.efficiency); setFuelPrice(trip.fuelPrice);
     setParking(trip.parking); setPassengers(trip.passengers);
+    setSharedTrip(!!trip.sharedTrip); setDriverDiscount(trip.driverDiscount ?? 25);
+    if (trip.members?.length) setMembers(trip.members);
+    else setMembers(Array.from({ length: Math.max(1, trip.passengers) }, (_, index) => ({ id: uid(), name: index === 0 ? 'You' : `Traveler ${index + 1}`, isDriver: index === 0, contribution: 0 })));
     setTollItems(trip.tollItems?.length ? trip.tollItems : [{ id: uid(), label: 'Saved toll', oneWayAmount: trip.tollOneWay }]);
     setExpenseItems(trip.expenseItems?.length ? trip.expenseItems : trip.other > 0 ? [{ id: uid(), label: 'Other expenses', category: 'other', amount: trip.other }] : []);
     setManualDistance(true); setRouteResolved(false); setSavedMessage('Previous trip loaded. Find the route again or use its saved distance.');
@@ -107,6 +118,18 @@ export default function PlanTrip() {
     const fuelShare = total > 0 ? (fuelCost / total) * 100 : 0;
     return { totalDistance, fuelUsed, fuelCost, tollOneWay, tollCost, parkingCost, extraCost, total, perPerson, costPerKm, fuelShare };
   }, [distance, efficiency, fuelPrice, tollItems, parking, expenseItems, passengers, tripType]);
+
+  useEffect(() => {
+    if (sharedTrip) setPassengers(Math.max(1, members.length));
+  }, [sharedTrip, members.length]);
+
+  const memberContributions = useMemo(() => {
+    if (!sharedTrip || !members.length) return [] as SharedTripMember[];
+    const discount = Math.min(100, Math.max(0, driverDiscount)) / 100;
+    const weights = members.map((member) => member.isDriver ? Math.max(0, 1 - discount) : 1);
+    const totalWeight = weights.reduce((sum, weight) => sum + weight, 0) || 1;
+    return members.map((member, index) => ({ ...member, contribution: result.total * weights[index] / totalWeight }));
+  }, [sharedTrip, members, driverDiscount, result.total]);
 
   const vehicleComparisons = useMemo(() => {
     const fixedCosts = result.tollCost + result.parkingCost + result.extraCost;
@@ -156,6 +179,7 @@ export default function PlanTrip() {
       oneWayDistance: distance, totalDistance: result.totalDistance, efficiency, fuelPrice, fuelUsed: result.fuelUsed,
       fuelCost: result.fuelCost, tollOneWay: result.tollOneWay, tollCost: result.tollCost, parking: result.parkingCost,
       other: result.extraCost, passengers, total: result.total, perPerson: result.perPerson, costPerKm: result.costPerKm,
+      sharedTrip, driverDiscount: sharedTrip ? driverDiscount : 0, members: sharedTrip ? memberContributions : [],
       tollItems, expenseItems,
     });
     setError(''); setSavedMessage('Trip saved to My Trips.');
@@ -167,6 +191,17 @@ export default function PlanTrip() {
   function addExpense(label = 'Other expense', category: ExpenseCategory = 'other') { setExpenseItems((items) => [...items, { id: uid(), label, category, amount: 0 }]); }
   function updateExpense(id: string, patch: Partial<TripExpense>) { setExpenseItems((items) => items.map((item) => item.id === id ? { ...item, ...patch } : item)); }
   function removeExpense(id: string) { setExpenseItems((items) => items.filter((item) => item.id !== id)); }
+  function addMember() { setMembers((items) => [...items, { id: uid(), name: `Traveler ${items.length + 1}`, isDriver: false, contribution: 0 }]); }
+  function removeMember(id: string) {
+    setMembers((items) => {
+      if (items.length <= 1) return items;
+      const next = items.filter((item) => item.id !== id);
+      if (!next.some((item) => item.isDriver)) next[0] = { ...next[0], isDriver: true };
+      return next;
+    });
+  }
+  function updateMemberName(id: string, name: string) { setMembers((items) => items.map((item) => item.id === id ? { ...item, name } : item)); }
+  function setDriver(id: string) { setMembers((items) => items.map((item) => ({ ...item, isDriver: item.id === id }))); }
 
   return <div className="page-stack">
     <PageHeader eyebrow="Plan Trip" title="Build your trip estimate" subtitle="Find the road route, organize toll segments, add real trip expenses, and see the true cost before you leave." />
@@ -215,10 +250,20 @@ export default function PlanTrip() {
 
         <div className="calculator-section">
           <div className="calculator-section-title"><span className="section-icon"><WalletCards size={17}/></span><div><strong>Trip expenses</strong><span>Parking is tracked separately; add food, stays, ferry costs, and anything else you want in the budget.</span></div></div>
-          <div className="field-grid two-fields phase7-parking-row"><NumberField label="Parking" value={parking} setValue={setParking} prefix="₱" min={0} step="0.01"/><NumberField label="Travelers" value={passengers} setValue={setPassengers} suffix="people" min={1} step="1"/></div>
+          <div className="field-grid two-fields phase7-parking-row"><NumberField label="Parking" value={parking} setValue={setParking} prefix="₱" min={0} step="0.01"/><NumberField label="Travelers" value={passengers} setValue={setPassengers} suffix="people" min={1} step="1" disabled={sharedTrip}/></div>
           <div className="quick-chip-row">{expensePresets.map((preset) => <button key={preset.label} type="button" className="expense-chip" onClick={() => addExpense(preset.label, preset.category)}><Plus size={13}/>{preset.label}</button>)}</div>
           <div className="dynamic-cost-list">{expenseItems.map((item) => <div className="dynamic-cost-row expense-row" key={item.id}><div className="dynamic-cost-name">{expenseIcon(item.category)}<input value={item.label} onChange={(e) => updateExpense(item.id, { label: e.target.value })} aria-label="Expense label"/></div><select className="expense-category-select" value={item.category} onChange={(e) => updateExpense(item.id, { category: e.target.value as ExpenseCategory })}><option value="food">Food</option><option value="accommodation">Stay</option><option value="ferry">Ferry</option><option value="parking">Parking</option><option value="other">Other</option></select><div className="number-input-shell compact-money"><span className="input-affix">₱</span><input type="number" min="0" step="0.01" value={item.amount} onChange={(e) => updateExpense(item.id, { amount: Number(e.target.value) })}/></div><button type="button" className="dynamic-remove" onClick={() => removeExpense(item.id)} aria-label="Remove expense"><Trash2 size={15}/></button></div>)}</div>
           <button type="button" className="add-line-btn" onClick={() => addExpense()}><Plus size={15}/> Add custom expense</button>
+        </div>
+        <div className="calculator-divider"/>
+
+        <div className="calculator-section shared-trip-section">
+          <div className="calculator-section-title shared-trip-heading"><span className="section-icon"><UsersRound size={17}/></span><div><strong>Shared trip</strong><span>Split the final cost across your group and optionally reduce the driver's share for providing the vehicle.</span></div><button type="button" className={`shared-toggle ${sharedTrip ? 'active' : ''}`} onClick={() => setSharedTrip((value) => !value)}><span>{sharedTrip ? 'On' : 'Off'}</span><i/></button></div>
+          {sharedTrip && <>
+            <div className="driver-discount-box"><div><Crown size={17}/><span><strong>Driver discount</strong><small>Reduce the driver's contribution; the remainder is redistributed evenly.</small></span></div><div className="discount-options">{[0,25,50,100].map((discount) => <button type="button" key={discount} className={driverDiscount === discount ? 'active' : ''} onClick={() => setDriverDiscount(discount)}>{discount === 100 ? 'Driver free' : `${discount}%`}</button>)}</div></div>
+            <div className="shared-members-list">{memberContributions.map((member, index) => <div className={`shared-member-row ${member.isDriver ? 'driver' : ''}`} key={member.id}><button type="button" className="driver-marker" onClick={() => setDriver(member.id)} title="Set as driver">{member.isDriver ? <Crown size={15}/> : <span>{index + 1}</span>}</button><input value={member.name} onChange={(e) => updateMemberName(member.id, e.target.value)} aria-label={`Traveler ${index + 1} name`}/><span className="member-role">{member.isDriver ? 'Driver' : 'Traveler'}</span><strong>{peso.format(member.contribution)}</strong><button type="button" className="dynamic-remove" onClick={() => removeMember(member.id)} disabled={members.length <= 1} aria-label="Remove traveler"><Trash2 size={14}/></button></div>)}</div>
+            <button type="button" className="add-line-btn" onClick={addMember}><UserPlus size={15}/> Add traveler</button>
+          </>}
         </div>
 
         {error && <div className="form-error">{error}</div>}
@@ -235,6 +280,7 @@ export default function PlanTrip() {
           <div className="result-footer-stats"><div><span>Total distance</span><strong>{number.format(result.totalDistance)} km</strong></div><div><span>Cost per km</span><strong>{peso.format(result.costPerKm)}</strong></div></div>
           <button className="result-save-btn" type="button" onClick={saveTrip}><Save size={17}/> Save this trip</button>
         </div>
+        {sharedTrip && <div className="panel shared-split-card"><div className="section-kicker">Shared trip split</div><div className="shared-split-title"><div><h3>Who pays what?</h3><p>{members.length} travelers • {driverDiscount}% driver discount</p></div><UsersRound size={22}/></div><div className="shared-split-list">{memberContributions.map((member) => <div key={member.id}><span>{member.name || 'Unnamed traveler'}{member.isDriver && <small>Driver</small>}</span><strong>{peso.format(member.contribution)}</strong></div>)}</div><div className="shared-split-total"><span>Group total</span><strong>{peso.format(result.total)}</strong></div></div>}
         <div className="panel vehicle-comparison-card">
           <div className="comparison-heading">
             <div>

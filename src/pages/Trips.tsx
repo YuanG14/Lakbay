@@ -65,7 +65,7 @@ export default function Trips() {
               <article className="saved-trip-card" key={trip.id}>
                 <div className="saved-trip-main">
                   <div className="saved-trip-route"><strong>{trip.origin}</strong><ArrowRight size={14}/><strong>{trip.destination}</strong></div>
-                  <div className="saved-trip-meta"><span><CalendarDays size={13}/>{formatDate(trip.createdAt)}</span><span><CarFront size={13}/>{trip.vehicleName}</span><span>{number.format(trip.totalDistance)} km</span></div>
+                  <div className="saved-trip-meta"><span><CalendarDays size={13}/>{formatDate(trip.createdAt)}</span><span><CarFront size={13}/>{trip.vehicleName}</span><span>{number.format(trip.totalDistance)} km</span>{trip.sharedTrip && <span><UsersRound size={13}/>Shared trip</span>}</div>
                 </div>
                 <div className="saved-trip-price"><strong>{peso.format(trip.total)}</strong><span>{peso.format(trip.perPerson)} / person</span></div>
                 <div className="saved-trip-actions">
@@ -96,6 +96,7 @@ function TripDetails({ trip, onClose, onReuse, onDelete }: { trip: SavedTrip; on
     </div>
     {trip.tollItems?.length ? <div className="trip-detail-cost-section"><h3>Toll breakdown</h3><div className="trip-detail-mini-list">{trip.tollItems.map((item) => <div className="trip-detail-mini-row" key={item.id}><span>{item.label}</span><strong>{peso.format(item.oneWayAmount)} one way</strong></div>)}</div></div> : null}
     {trip.expenseItems?.length ? <div className="trip-detail-cost-section"><h3>Additional expenses</h3><div className="trip-detail-mini-list">{trip.expenseItems.map((item) => <div className="trip-detail-mini-row" key={item.id}><span>{item.label}</span><strong>{peso.format(item.amount)}</strong></div>)}</div></div> : null}
+    {trip.sharedTrip && trip.members?.length ? <div className="trip-detail-cost-section shared-trip-detail"><h3>Shared trip split</h3><p className="shared-detail-note">Driver discount: {trip.driverDiscount ?? 0}%</p><div className="trip-detail-mini-list">{trip.members.map((member) => <div className="trip-detail-mini-row" key={member.id}><span>{member.name}{member.isDriver ? ' • Driver' : ''}</span><strong>{peso.format(member.contribution)}</strong></div>)}</div></div> : null}
     <div className="modal-actions trip-detail-actions"><button className="ghost-btn trip-delete-btn" onClick={onDelete}><Trash2 size={16}/> Delete</button><button className="secondary-btn" onClick={onClose}>Close</button><button className="primary-btn" onClick={onReuse}><Copy size={16}/> Reuse trip</button></div>
   </div></div>;
 }
