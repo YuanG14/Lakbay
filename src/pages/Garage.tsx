@@ -1,6 +1,7 @@
 import { FormEvent, useMemo, useState } from 'react';
 import { CarFront, Check, Fuel, Gauge, Pencil, Plus, Star, Trash2, X } from 'lucide-react';
 import PageHeader from '../components/ui/PageHeader';
+import BlankableNumberInput from '../components/ui/BlankableNumberInput';
 import { useVehicles } from '../context/VehicleContext';
 import type { FuelType, Vehicle, VehicleInput } from '../types/vehicle';
 
@@ -162,10 +163,10 @@ export default function Garage() {
             <form onSubmit={saveVehicle} className="vehicle-form">
               <label className="full-field"><span>Vehicle name</span><input autoFocus value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Toyota Vios XLE" /></label>
               <div className="vehicle-form-grid">
-                <label><span>Model year</span><input type="number" min="1980" max={new Date().getFullYear() + 1} value={form.year} onChange={(e) => setForm({ ...form, year: Number(e.target.value) })} /></label>
+                <label><span>Model year</span><BlankableNumberInput min="1980" max={new Date().getFullYear() + 1} value={form.year} onValueChange={(value) => setForm((current) => ({ ...current, year: value }))} /></label>
                 <label><span>Fuel type</span><select value={form.fuelType} onChange={(e) => setForm({ ...form, fuelType: e.target.value as FuelType })}><option>Gasoline</option><option>Diesel</option><option>Hybrid</option><option>Electric</option></select></label>
-                <label><span>Fuel efficiency</span><div className="vehicle-number-field"><input type="number" min="0.1" step="0.1" value={form.efficiency} onChange={(e) => setForm({ ...form, efficiency: Number(e.target.value) })} /><span>km/L</span></div></label>
-                <label><span>Tank capacity</span><div className="vehicle-number-field"><input type="number" min="1" step="1" value={form.tankCapacity ?? ''} onChange={(e) => setForm({ ...form, tankCapacity: e.target.value ? Number(e.target.value) : undefined })} /><span>L</span></div></label>
+                <label><span>Fuel efficiency</span><div className="vehicle-number-field"><BlankableNumberInput min="0.1" step="0.1" value={form.efficiency} onValueChange={(value) => setForm((current) => ({ ...current, efficiency: value }))} /><span>km/L</span></div></label>
+                <label><span>Tank capacity</span><div className="vehicle-number-field"><BlankableNumberInput min="1" step="1" value={form.tankCapacity} onValueChange={(value) => setForm((current) => ({ ...current, tankCapacity: value }))} onEmpty={() => setForm((current) => ({ ...current, tankCapacity: undefined }))} /><span>L</span></div></label>
               </div>
               {error && <div className="form-error">{error}</div>}
               <div className="modal-actions"><button type="button" className="ghost-btn" onClick={closeModal}>Cancel</button><button className="primary-btn" type="submit"><Check size={16} /> {editing ? 'Save changes' : 'Add vehicle'}</button></div>
