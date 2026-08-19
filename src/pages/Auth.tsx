@@ -1,5 +1,5 @@
 import { FormEvent, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import { ArrowRight, Eye, EyeOff, Lock, Mail, Route, UserRound } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -16,7 +16,8 @@ function friendlyAuthError(error: unknown) {
 
 export default function Auth() {
   const { user, login, signup } = useAuth();
-  const [mode, setMode] = useState<'login' | 'signup'>('login');
+  const [searchParams] = useSearchParams();
+  const [mode, setMode] = useState<'login' | 'signup'>(searchParams.get('mode') === 'signup' ? 'signup' : 'login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -24,7 +25,7 @@ export default function Auth() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
-  if (user) return <Navigate to="/" replace />;
+  if (user) return <Navigate to="/dashboard" replace />;
 
   async function submit(event: FormEvent) {
     event.preventDefault();
