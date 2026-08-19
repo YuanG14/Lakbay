@@ -1,8 +1,8 @@
-# Lakbay — Phase 7
+# Lakbay — Phase 8
 
 Smart Trip Cost Planner built with React, Vite, TypeScript, Firebase, Firestore, OpenStreetMap and Leaflet.
 
-## Phase 7 additions
+## Phase 8 additions
 
 - Toll planner with multiple named toll/expressway segments
 - Quick-add Philippine expressway labels (rates remain user-entered so stale prices are never assumed)
@@ -33,8 +33,13 @@ users/{uid}/vehicles/{vehicleId}
 users/{uid}/trips/{tripId}
 ```
 
-Phase 7 saves optional `tollItems` and `expenseItems` arrays on new trip records while keeping the previous summary fields for backward compatibility.
+Phase 8 saves optional `tollItems` and `expenseItems` arrays on new trip records while keeping the previous summary fields for backward compatibility.
 
 ## Toll-rate note
 
-Phase 7 intentionally does not hard-code toll prices. Toll schedules can change, so Lakbay provides named toll segments and lets the user enter the current amount. A future production integration can replace this with a maintained toll-rate data source without changing the trip-calculation model.
+Phase 8 intentionally does not hard-code toll prices. Toll schedules can change, so Lakbay provides named toll segments and lets the user enter the current amount. A future production integration can replace this with a maintained toll-rate data source without changing the trip-calculation model.
+
+
+## Phase 8 — Vehicle Comparison
+
+Phase 8 compares every saved vehicle against the current trip. The ranking uses the current route distance, fuel price, tolls, parking, extra expenses, passenger count, and each vehicle's saved fuel efficiency. Users can switch vehicles directly from the comparison table and immediately see the calculator update.
