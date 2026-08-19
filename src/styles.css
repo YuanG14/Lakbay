@@ -389,3 +389,117 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 @media(max-width:700px){
   .landing-preview:hover,.landing-feature-card:hover,.landing-steps article:hover,.landing-why-card:hover,.landing-proof-strip>div:hover{transform:none}
 }
+
+/* =========================================================
+   Lakbay landing page — product-led visual identity refresh
+   ========================================================= */
+.lakbay-site{
+  min-height:100vh;
+  overflow-x:clip;
+  color:#10251d;
+  background:
+    radial-gradient(circle at 82% 8%,rgba(17,114,86,.07),transparent 27%),
+    linear-gradient(180deg,#f8fbf9 0%,#fff 36%,#f7faf8 100%);
+}
+.lakbay-site-header{position:sticky;top:0;z-index:80;background:rgba(249,252,250,.9);backdrop-filter:blur(16px);border-bottom:1px solid #e0eae5}
+.lakbay-site-nav{width:min(1240px,calc(100% - 48px));height:78px;margin:0 auto;display:flex;align-items:center}
+.lakbay-site-brand{display:inline-flex;align-items:center;gap:12px;flex:none;color:#10251d}
+.lakbay-site-brandmark{width:44px;height:44px;border-radius:13px;background:#0f6b51;color:#fff;display:grid;place-items:center;box-shadow:0 9px 22px rgba(15,107,81,.18)}
+.lakbay-site-brandmark.small{width:37px;height:37px;border-radius:11px}
+.lakbay-site-brandtext{display:grid;gap:0}
+.lakbay-site-brandtext strong{font-size:20px;line-height:1.1;letter-spacing:-.035em}
+.lakbay-site-brandtext small{font-size:12px;color:#74827c;margin-top:2px}
+.lakbay-site-links{display:flex;align-items:center;gap:46px;margin-left:auto}
+.lakbay-site-links a,.lakbay-site-actions>a:not(.lakbay-site-primary){position:relative;font-size:15px;font-weight:700;color:#5b6c64}
+.lakbay-site-links a:after,.lakbay-site-actions>a:not(.lakbay-site-primary):after{content:"";position:absolute;left:0;right:0;bottom:-8px;height:2px;border-radius:10px;background:#0f6b51;transform:scaleX(0);transition:transform .2s ease}
+.lakbay-site-links a:hover,.lakbay-site-actions>a:not(.lakbay-site-primary):hover{color:#0f6b51}
+.lakbay-site-links a:hover:after,.lakbay-site-actions>a:not(.lakbay-site-primary):hover:after{transform:scaleX(1)}
+.lakbay-site-actions{display:flex;align-items:center;gap:32px;margin-left:48px}
+.lakbay-site-primary{min-height:46px;padding:0 20px;border-radius:11px;background:#0f6b51;color:#fff;display:inline-flex;align-items:center;justify-content:center;gap:10px;font-size:14px;font-weight:800;box-shadow:0 10px 24px rgba(15,107,81,.17);transition:transform .2s ease,background .2s ease,box-shadow .2s ease}
+.lakbay-site-primary:hover{background:#0c5642;transform:translateY(-2px);box-shadow:0 14px 28px rgba(15,107,81,.22)}
+.lakbay-site-primary svg{transition:transform .2s ease}.lakbay-site-primary:hover svg{transform:translateX(4px)}
+.lakbay-site-primary.large{min-height:52px;padding:0 24px;font-size:15px}
+.lakbay-site-primary.light{background:#fff;color:#0e5c46;box-shadow:none}.lakbay-site-primary.light:hover{background:#f1f8f4}
+.lakbay-site-menu{display:none;margin-left:auto;width:42px;height:42px;border:1px solid #d8e5de;border-radius:11px;background:#fff;color:#315347;place-items:center}
+.lakbay-site-mobile-menu{display:none}
+
+.lakbay-site-hero{width:min(1240px,calc(100% - 48px));margin:0 auto;padding:96px 0 78px;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(480px,.95fr);gap:86px;align-items:center}
+.lakbay-site-road-label{display:inline-flex;align-items:center;gap:9px;color:#0f6b51;font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;border-left:3px solid #0f6b51;padding-left:11px}
+.lakbay-site-hero-copy h1{font-size:64px;line-height:.99;letter-spacing:-.065em;margin:25px 0 24px;max-width:690px;color:#10251d}
+.lakbay-site-hero-copy h1 span{display:block;color:#0f6b51}
+.lakbay-site-hero-copy>p{max-width:660px;margin:0;color:#62726b;font-size:18px;line-height:1.72}
+.lakbay-site-hero-actions{display:flex;align-items:center;gap:24px;margin-top:34px}
+.lakbay-site-quiet{font-size:14px;font-weight:800;color:#244b3d;border-bottom:1px solid #9bbdaf;padding:7px 0 5px;transition:color .2s ease,border-color .2s ease}
+.lakbay-site-quiet:hover{color:#0f6b51;border-color:#0f6b51}
+.lakbay-site-meta{display:flex;align-items:center;flex-wrap:wrap;gap:12px 24px;margin-top:26px;color:#64756d;font-size:12px;font-weight:700}
+.lakbay-site-meta span{display:flex;align-items:center;gap:6px}.lakbay-site-meta svg{color:#0f6b51}
+
+.lakbay-trip-sheet{position:relative;background:#fff;border:1px solid #d6e4dd;padding:30px;border-radius:8px 28px 8px 28px;box-shadow:0 30px 80px rgba(31,70,55,.13);animation:landingFadeUp .7s cubic-bezier(.2,.8,.2,1) .13s backwards}
+.lakbay-trip-sheet:after{content:"";position:absolute;left:-9px;top:48px;width:18px;height:52px;background:repeating-linear-gradient(180deg,#0f6b51 0 7px,transparent 7px 14px);opacity:.65}
+.lakbay-trip-sheet-head{display:flex;align-items:flex-start;justify-content:space-between;padding-bottom:20px;border-bottom:1px solid #e2ebe6}
+.lakbay-trip-sheet-head>div{display:grid;gap:3px}.lakbay-trip-sheet-head>div span{font:800 10px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;color:#809089;letter-spacing:.1em}.lakbay-trip-sheet-head>div strong{font-size:17px;letter-spacing:-.02em}
+.lakbay-trip-sheet-status{font:900 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em;color:#0f6b51;background:#e8f5ef;padding:8px 9px;border-radius:5px}
+.lakbay-trip-route{position:relative;margin:24px 0 22px;padding-left:28px;display:grid;gap:19px}
+.lakbay-trip-route-line{position:absolute;left:6px;top:9px;bottom:9px;border-left:2px dashed #b7cfc3}
+.lakbay-trip-stop{position:relative;display:grid;gap:2px}.lakbay-trip-node{position:absolute;left:-28px;top:7px;width:14px;height:14px;border-radius:50%;background:#fff;border:3px solid #9cafA6;box-shadow:0 0 0 3px #fff}.lakbay-trip-node.active{background:#0f6b51;border-color:#0f6b51}
+.lakbay-trip-stop small{font-size:9px;font-weight:900;letter-spacing:.1em;color:#84928c}.lakbay-trip-stop strong{font-size:16px}
+.lakbay-trip-facts{display:grid;grid-template-columns:1fr 1.2fr;border-top:1px solid #e5ece8;border-bottom:1px solid #e5ece8}
+.lakbay-trip-facts>div{display:flex;align-items:center;gap:11px;padding:15px 2px;color:#0f6b51}.lakbay-trip-facts>div+div{border-left:1px solid #e5ece8;padding-left:18px}.lakbay-trip-facts span{display:grid;gap:2px}.lakbay-trip-facts small{font-size:9px;font-weight:900;letter-spacing:.08em;color:#84928c}.lakbay-trip-facts strong{font-size:13px;color:#213c32}
+.lakbay-trip-total{display:flex;align-items:end;justify-content:space-between;gap:20px;padding:24px 0 18px}.lakbay-trip-total span{font-size:13px;color:#607169;font-weight:700}.lakbay-trip-total strong{font-size:34px;letter-spacing:-.055em;color:#0d5d46}
+.lakbay-trip-ledger{border-top:2px solid #0f6b51;border-bottom:1px solid #dce8e2}.lakbay-trip-ledger>div{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:11px 2px;border-bottom:1px dashed #dbe6e0}.lakbay-trip-ledger>div:last-child{border-bottom:0}.lakbay-trip-ledger span{display:flex;align-items:center;gap:8px;font-size:12px;color:#66766f}.lakbay-trip-ledger svg{color:#0f6b51}.lakbay-trip-ledger strong{font-size:13px;color:#1e372e}
+.lakbay-trip-split{display:flex;align-items:center;justify-content:space-between;margin-top:17px;padding-top:16px;border-top:1px solid #e4ece8;color:#63736c;font-size:12px}.lakbay-trip-split span{display:flex;align-items:center;gap:7px}.lakbay-trip-split b{color:#17372b;font-size:14px}
+
+.lakbay-cost-anatomy{width:min(1240px,calc(100% - 48px));margin:0 auto 112px;padding:30px 0;border-top:1px solid #dbe7e1;border-bottom:1px solid #dbe7e1;display:grid;grid-template-columns:280px 1fr;gap:44px;align-items:center}
+.lakbay-cost-anatomy-title{display:grid;gap:5px}.lakbay-cost-anatomy-title span{font-size:11px;font-weight:900;color:#0f6b51;letter-spacing:.07em;text-transform:uppercase}.lakbay-cost-anatomy-title strong{font-size:20px;letter-spacing:-.025em}
+.lakbay-cost-bar{height:10px;border-radius:999px;overflow:hidden;display:flex;background:#e7eee9}.lakbay-cost-bar span{height:100%}.lakbay-cost-bar .fuel{width:49.6%;background:#0f6b51}.lakbay-cost-bar .toll{width:37.7%;background:#75a992}.lakbay-cost-bar .other{width:12.7%;background:#c7d9d0}
+.lakbay-cost-legend{grid-column:2;display:flex;flex-wrap:wrap;gap:14px 26px;margin-top:-25px}.lakbay-cost-legend span{display:flex;align-items:center;gap:7px;color:#687770;font-size:12px}.lakbay-cost-legend i{width:8px;height:8px;border-radius:50%}.lakbay-cost-legend i.fuel{background:#0f6b51}.lakbay-cost-legend i.toll{background:#75a992}.lakbay-cost-legend i.other{background:#c7d9d0}.lakbay-cost-legend b{color:#263f35}
+
+.lakbay-product-section{width:min(1240px,calc(100% - 48px));margin:0 auto;padding-bottom:120px}
+.lakbay-section-intro{display:grid;grid-template-columns:180px minmax(0,530px) minmax(280px,1fr);gap:35px;align-items:start;margin-bottom:48px}
+.lakbay-section-intro>span,.lakbay-road-workflow-head>span,.lakbay-why-copy>span,.lakbay-final-cta>div>span{font:900 11px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em;color:#0f6b51}
+.lakbay-section-intro h2{font-size:42px;line-height:1.05;letter-spacing:-.05em;margin:0;color:#11291f}.lakbay-section-intro p{font-size:16px;line-height:1.7;color:#6b7a73;margin:2px 0 0}
+.lakbay-product-layout{display:grid;grid-template-columns:1.03fr .97fr;gap:68px;align-items:start}
+.lakbay-garage-demo{background:#103f31;color:#fff;padding:30px;border-radius:4px 30px 4px 30px;box-shadow:0 24px 60px rgba(16,63,49,.14)}
+.lakbay-garage-demo-head{display:flex;align-items:end;justify-content:space-between;gap:20px;padding-bottom:22px;border-bottom:1px solid rgba(255,255,255,.13)}.lakbay-garage-demo-head span{font-size:18px;font-weight:800}.lakbay-garage-demo-head small{color:#a8c4b8;font-size:11px}
+.lakbay-vehicle-row{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:18px 0;border-bottom:1px solid rgba(255,255,255,.1)}.lakbay-vehicle-row.selected{color:#fff}.lakbay-vehicle-icon{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.08);color:#9ee0bf}.lakbay-vehicle-row>div:nth-child(2){display:grid;gap:3px}.lakbay-vehicle-row>div:nth-child(2) strong{font-size:15px}.lakbay-vehicle-row>div:nth-child(2) small{font-size:11px;color:#9ebcaf}.lakbay-vehicle-cost{display:grid;gap:2px;text-align:right}.lakbay-vehicle-cost small{font-size:9px;color:#8eb2a2;text-transform:uppercase;letter-spacing:.08em}.lakbay-vehicle-cost strong{font-size:18px}.lakbay-garage-result{margin-top:22px;padding:18px 19px;background:#eaf6f0;color:#103f31;display:grid;gap:5px;border-radius:2px 15px 2px 15px}.lakbay-garage-result span{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#42715e}.lakbay-garage-result strong{font-size:15px}
+.lakbay-product-rows{border-top:1px solid #dce7e1}.lakbay-product-rows article{display:grid;grid-template-columns:42px 1fr;gap:16px;padding:20px 0;border-bottom:1px solid #dce7e1}.lakbay-product-row-icon{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#edf6f1;color:#0f6b51}.lakbay-product-rows article>div{display:grid}.lakbay-product-rows small{font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#0f6b51}.lakbay-product-rows h3{font-size:16px;line-height:1.35;margin:3px 0 4px;letter-spacing:-.015em}.lakbay-product-rows p{font-size:13px;line-height:1.55;color:#728079;margin:0}
+
+.lakbay-road-workflow{background:#102f26;color:#fff;padding:88px 0}
+.lakbay-road-workflow-inner{width:min(1240px,calc(100% - 48px));margin:0 auto}
+.lakbay-road-workflow-head{display:flex;align-items:end;justify-content:space-between;gap:30px;margin-bottom:56px}.lakbay-road-workflow-head>span{color:#7fd1aa}.lakbay-road-workflow-head h2{max-width:500px;font-size:42px;line-height:1.04;letter-spacing:-.05em;margin:0;color:#fff;text-align:right}
+.lakbay-road-steps{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:28px}.lakbay-road-steps:before{content:"";position:absolute;left:28px;right:28px;top:22px;border-top:1px dashed rgba(151,207,181,.4)}
+.lakbay-road-steps article{position:relative;padding-top:58px}.lakbay-road-step-number{position:absolute;z-index:2;top:0;left:0;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#102f26;border:1px solid #6da991;color:#9bdfbe;font:800 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace}.lakbay-road-steps article h3{font-size:17px;margin:0 0 10px}.lakbay-road-steps article p{font-size:13px;line-height:1.62;color:#a9c0b5;margin:0}
+
+.lakbay-why-section{width:min(1240px,calc(100% - 48px));margin:0 auto;padding:110px 0;display:grid;grid-template-columns:.95fr 1.05fr;gap:86px;align-items:center}
+.lakbay-why-copy>span{color:#0f6b51}.lakbay-why-copy h2{font-size:44px;line-height:1.04;letter-spacing:-.055em;margin:13px 0 18px;max-width:560px}.lakbay-why-copy>p{font-size:16px;line-height:1.72;color:#687870;max-width:590px;margin:0}
+.lakbay-account-note{display:flex;align-items:flex-start;gap:12px;margin-top:27px;padding-top:22px;border-top:1px solid #dce7e1;color:#0f6b51}.lakbay-account-note>div{display:grid;gap:4px}.lakbay-account-note strong{font-size:14px;color:#203b30}.lakbay-account-note small{font-size:12px;line-height:1.5;color:#77847e}
+.lakbay-before-after{border:1px solid #d6e4dd;background:#fff;display:grid;grid-template-columns:1fr 1fr;box-shadow:0 18px 50px rgba(29,75,58,.07)}.lakbay-before-after>div{padding:30px}.lakbay-before-after>div+div{border-left:1px solid #dce7e1}.lakbay-before-after small{font:900 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.1em;color:#8b9691}.lakbay-before-after .after small{color:#0f6b51}.lakbay-before-after p{font-size:14px;line-height:1.5;margin:20px 0 0;color:#6c7974}.lakbay-before-after .before p{text-decoration:line-through;text-decoration-color:#c6d1cc}.lakbay-before-after .after p{display:flex;align-items:center;gap:9px;color:#29463a;font-weight:700}.lakbay-before-after .after svg{color:#0f6b51}
+
+.lakbay-final-cta{background:#0f6b51;color:#fff;padding:48px max(24px,calc((100vw - 1240px)/2));display:flex;align-items:center;justify-content:space-between;gap:30px}.lakbay-final-cta>div{display:grid;gap:8px}.lakbay-final-cta>div>span{color:#a4dbc0}.lakbay-final-cta h2{font-size:32px;letter-spacing:-.045em;margin:0;color:#fff}
+.lakbay-site-footer{width:min(1240px,calc(100% - 48px));min-height:100px;margin:0 auto;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:25px;color:#7c8983}.lakbay-site-footer p{font-size:13px;margin:0}.lakbay-site-footer>span{font-size:12px;text-align:right}.lakbay-site-footer .lakbay-site-brandtext strong{font-size:17px}
+
+.landing-reveal{opacity:0;transform:translateY(18px);transition:opacity .55s ease,transform .55s cubic-bezier(.2,.8,.2,1)}.landing-reveal.is-visible{opacity:1;transform:none}
+.lakbay-site-nav{animation:landingNavDrop .4s cubic-bezier(.2,.8,.2,1) backwards}.lakbay-site-hero-copy{animation:landingFadeUp .62s cubic-bezier(.2,.8,.2,1) .04s backwards}
+.lakbay-product-rows article,.lakbay-vehicle-row,.lakbay-before-after>div{transition:background .2s ease,transform .2s ease}.lakbay-product-rows article:hover{background:#f7faf8}.lakbay-vehicle-row:hover{background:rgba(255,255,255,.025)}
+
+@media(max-width:1040px){
+  .desktop-landing-links{display:none}.lakbay-site-menu{display:grid}.lakbay-site-mobile-menu{display:grid;width:min(100% - 48px,1240px);margin:0 auto;padding:8px 0 18px;gap:4px}.lakbay-site-mobile-menu>a{padding:11px 4px;color:#52665d;font-size:14px;font-weight:700}.lakbay-site-mobile-menu .lakbay-site-primary{margin-top:6px;color:#fff}
+  .lakbay-site-hero{grid-template-columns:1fr;gap:58px;padding-top:70px}.lakbay-site-hero-copy{text-align:center}.lakbay-site-road-label{margin:0 auto}.lakbay-site-hero-copy h1,.lakbay-site-hero-copy>p{margin-left:auto;margin-right:auto}.lakbay-site-hero-actions,.lakbay-site-meta{justify-content:center}.lakbay-trip-sheet{width:min(650px,100%);margin:0 auto}
+  .lakbay-section-intro{grid-template-columns:1fr;gap:12px}.lakbay-section-intro>span{margin-bottom:2px}.lakbay-product-layout{grid-template-columns:1fr;gap:42px}.lakbay-garage-demo{width:min(680px,100%)}
+  .lakbay-road-workflow-head{display:grid;gap:12px}.lakbay-road-workflow-head h2{text-align:left}.lakbay-road-steps{grid-template-columns:1fr 1fr;gap:34px 28px}.lakbay-road-steps:before{display:none}
+  .lakbay-why-section{grid-template-columns:1fr;gap:48px}
+}
+
+@media(max-width:700px){
+  .lakbay-site-nav{width:min(100% - 28px,1240px);height:70px}.lakbay-site-brandmark{width:40px;height:40px}.lakbay-site-brandtext strong{font-size:18px}.lakbay-site-brandtext small{font-size:11px}.lakbay-site-mobile-menu{width:min(100% - 28px,1240px)}
+  .lakbay-site-hero{width:min(100% - 28px,1240px);padding:52px 0 58px;gap:42px}.lakbay-site-hero-copy h1{font-size:45px;margin-top:20px}.lakbay-site-hero-copy>p{font-size:16px;line-height:1.65}.lakbay-site-hero-actions{flex-direction:column;gap:14px}.lakbay-site-hero-actions>a{width:100%}.lakbay-site-meta{gap:10px 14px;font-size:11px}
+  .lakbay-trip-sheet{padding:22px;border-radius:6px 22px 6px 22px}.lakbay-trip-sheet:after{display:none}.lakbay-trip-facts{grid-template-columns:1fr}.lakbay-trip-facts>div+div{border-left:0;border-top:1px solid #e5ece8;padding-left:2px}.lakbay-trip-total strong{font-size:30px}.lakbay-trip-ledger>div{padding:10px 0}
+  .lakbay-cost-anatomy{width:min(100% - 28px,1240px);grid-template-columns:1fr;gap:18px;margin-bottom:72px}.lakbay-cost-legend{grid-column:1;margin-top:0}.lakbay-product-section{width:min(100% - 28px,1240px);padding-bottom:78px}.lakbay-section-intro h2{font-size:34px}.lakbay-section-intro p{font-size:15px}.lakbay-garage-demo{padding:22px}.lakbay-garage-demo-head{align-items:start;flex-direction:column;gap:5px}.lakbay-vehicle-row{grid-template-columns:auto 1fr}.lakbay-vehicle-cost{grid-column:2;text-align:left}.lakbay-product-rows article{grid-template-columns:38px 1fr}
+  .lakbay-road-workflow{padding:64px 0}.lakbay-road-workflow-inner{width:min(100% - 28px,1240px)}.lakbay-road-workflow-head h2{font-size:34px}.lakbay-road-steps{grid-template-columns:1fr;gap:28px}.lakbay-road-steps article{padding-top:52px}
+  .lakbay-why-section{width:min(100% - 28px,1240px);padding:74px 0}.lakbay-why-copy h2{font-size:35px}.lakbay-before-after{grid-template-columns:1fr}.lakbay-before-after>div+div{border-left:0;border-top:1px solid #dce7e1}.lakbay-before-after>div{padding:24px}
+  .lakbay-final-cta{padding:38px 20px;display:grid}.lakbay-final-cta h2{font-size:28px}.lakbay-final-cta>a{width:100%}.lakbay-site-footer{width:min(100% - 28px,1240px);padding:28px 0;grid-template-columns:1fr;justify-items:center;text-align:center}.lakbay-site-footer>span{text-align:center}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .lakbay-site *{animation:none!important;transition:none!important;scroll-behavior:auto!important}.landing-reveal{opacity:1;transform:none}
+}
