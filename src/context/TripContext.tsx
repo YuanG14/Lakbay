@@ -1,43 +1,10 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import { SavedTrip } from '../types/trip';
-
-const STORAGE_KEY = 'lakbay-trips';
-
-type TripContextValue = {
-  trips: SavedTrip[];
-  addTrip: (trip: Omit<SavedTrip, 'id' | 'createdAt'>) => SavedTrip;
-  deleteTrip: (id: string) => void;
-  getTrip: (id: string) => SavedTrip | undefined;
-};
-
-const TripContext = createContext<TripContextValue | undefined>(undefined);
-
-export function TripProvider({ children }: { children: ReactNode }) {
-  const [trips, setTrips] = useState<SavedTrip[]>(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch { return []; }
-  });
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(trips));
-  }, [trips]);
-
-  const addTrip = (data: Omit<SavedTrip, 'id' | 'createdAt'>) => {
-    const trip: SavedTrip = { ...data, id: crypto.randomUUID(), createdAt: new Date().toISOString() };
-    setTrips((current) => [trip, ...current]);
-    return trip;
-  };
-
-  const deleteTrip = (id: string) => setTrips((current) => current.filter((trip) => trip.id !== id));
-  const getTrip = (id: string) => trips.find((trip) => trip.id === id);
-
-  return <TripContext.Provider value={{ trips, addTrip, deleteTrip, getTrip }}>{children}</TripContext.Provider>;
-}
-
-export function useTrips() {
-  const context = useContext(TripContext);
-  if (!context) throw new Error('useTrips must be used inside TripProvider');
-  return context;
-}
+import { collection, deleteDoc, doc, onSnapshot, setDoc } from 'firebase/firestore';
+import { SavedTrip } from '../types/trip'; import { db } from '../lib/firebase'; import { useAuth } from './AuthContext';
+type V={trips:SavedTrip[];loading:boolean;addTrip:(t:Omit<SavedTrip,'id'|'createdAt'>)=>SavedTrip;deleteTrip:(id:string)=>void;getTrip:(id:string)=>SavedTrip|undefined}; const C=createContext<V|undefined>(undefined);
+export function TripProvider({children}:{children:ReactNode}){const {user}=useAuth();const [trips,setTrips]=useState<SavedTrip[]>([]);const[loading,setLoading]=useState(false);
+ useEffect(()=>{if(!user||!db){setTrips([]);return;}setLoading(true);return onSnapshot(collection(db,'users',user.uid,'trips'),s=>{const list=s.docs.map(d=>({id:d.id,...d.data()} as SavedTrip)).sort((a,b)=>b.createdAt.localeCompare(a.createdAt));setTrips(list);setLoading(false)},()=>setLoading(false));},[user]);
+ const addTrip=(data:Omit<SavedTrip,'id'|'createdAt'>)=>{const trip:SavedTrip={...data,id:crypto.randomUUID(),createdAt:new Date().toISOString()};setTrips(c=>[trip,...c]);if(user&&db)setDoc(doc(db,'users',user.uid,'trips',trip.id),trip).catch(console.error);return trip};
+ const deleteTrip=(id:string)=>{setTrips(c=>c.filter(t=>t.id!==id));if(user&&db)deleteDoc(doc(db,'users',user.uid,'trips',id)).catch(console.error)}; const getTrip=(id:string)=>trips.find(t=>t.id===id);
+ return <C.Provider value={{trips,loading,addTrip,deleteTrip,getTrip}}>{children}</C.Provider>}
+export function useTrips(){const c=useContext(C);if(!c)throw new Error('useTrips must be used inside TripProvider');return c}
