@@ -1,23 +1,36 @@
-# Lakbay — Smart Trip Cost Planner
+# Lakbay — Phase 2
 
-Phase 1 establishes the responsive React/Vite UI foundation.
+Smart Trip Cost Planner for Philippine road trips.
 
-## Included
-- Dashboard
-- Plan Trip
-- My Trips
-- My Garage
-- Analytics
-- Settings
-- Responsive desktop/mobile navigation
-- Green-and-white design system
-- Philippine peso defaults
+## Phase 2 features
+
+- Functional trip cost calculator
+- One-way and round-trip calculations
+- Fuel usage and fuel cost estimation
+- Toll, parking, and other expenses
+- Passenger cost splitting
+- Cost per kilometer
+- Responsive live result summary
+- Input validation
+- Philippine Peso formatting
+- Existing Phase 1 dashboard/pages preserved
+
+## Calculation rules
+
+- Total distance = one-way distance × 2 for round trips
+- Fuel used = total distance ÷ km/L
+- Fuel cost = fuel used × fuel price
+- Round-trip toll = one-way toll × 2
+- Total = fuel + toll + parking + other expenses
+- Per person = total ÷ travelers
 
 ## Run locally
+
 ```bash
 npm install
 npm run dev
 ```
 
-## Phase 2
-Trip cost calculator logic: fuel, tolls, parking, passenger split, and summary.
+## Recommended branch
+
+`feature/phase-2-trip-calculator`
