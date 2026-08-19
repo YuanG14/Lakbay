@@ -226,3 +226,30 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
   .landing-why-card{padding:26px 22px}
   .landing-footer{min-height:0;padding:26px 0}
 }
+
+/* Landing capability strip readability */
+.landing-proof-strip>div{
+  padding:26px 28px;
+  gap:7px;
+}
+.landing-proof-strip strong{
+  font-size:18px;
+  line-height:1.25;
+  letter-spacing:-.015em;
+}
+.landing-proof-strip span{
+  font-size:14px;
+  line-height:1.45;
+}
+
+@media(max-width:700px){
+  .landing-proof-strip>div{
+    padding:21px 20px;
+  }
+  .landing-proof-strip strong{
+    font-size:16px;
+  }
+  .landing-proof-strip span{
+    font-size:13px;
+  }
+}
