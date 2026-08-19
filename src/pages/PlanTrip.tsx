@@ -7,14 +7,15 @@ import {
 } from 'lucide-react';
 import PageHeader from '../components/ui/PageHeader';
 import RouteMap, { LatLng } from '../components/RouteMap';
+import FreePlaceInput from '../components/FreePlaceInput';
+import { findDrivingRoute, geocodeFirst, routingConfigured } from '../lib/freeMaps';
 import { useVehicles } from '../context/VehicleContext';
 import { useTrips } from '../context/TripContext';
 import { ExpenseCategory, SharedTripMember, TollItem, TripExpense } from '../types/trip';
 import { readPreferences } from '../lib/preferences';
 
 type TripType = 'round' | 'oneway';
-type GeocodeResult = { lat: string; lon: string; display_name: string };
-type OsrmRoute = { distance: number; duration: number; geometry: { coordinates: [number, number][] } };
+type PlaceSelection = { label: string; coords: LatLng };
 
 const peso = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const number = new Intl.NumberFormat('en-PH', { maximumFractionDigits: 2 });
@@ -25,26 +26,6 @@ const expensePresets: { label: string; category: ExpenseCategory }[] = [
 ];
 
 const uid = () => crypto.randomUUID();
-
-async function geocodePlace(query: string): Promise<{ coords: LatLng; label: string } | null> {
-  const url = new URL('https://nominatim.openstreetmap.org/search');
-  url.searchParams.set('q', query); url.searchParams.set('format', 'jsonv2'); url.searchParams.set('limit', '1');
-  url.searchParams.set('countrycodes', 'ph'); url.searchParams.set('addressdetails', '1');
-  const response = await fetch(url.toString(), { headers: { 'Accept-Language': 'en-PH,en;q=0.9' } });
-  if (!response.ok) throw new Error('Place search is temporarily unavailable.');
-  const results = (await response.json()) as GeocodeResult[];
-  if (!results[0]) return null;
-  return { coords: [Number(results[0].lat), Number(results[0].lon)], label: results[0].display_name };
-}
-
-async function fetchDrivingRoute(origin: LatLng, destination: LatLng): Promise<OsrmRoute> {
-  const coordinates = `${origin[1]},${origin[0]};${destination[1]},${destination[0]}`;
-  const response = await fetch(`https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=geojson&steps=false`);
-  if (!response.ok) throw new Error('Road routing is temporarily unavailable.');
-  const data = await response.json();
-  if (data.code !== 'Ok' || !data.routes?.[0]) throw new Error('No drivable route was found for these places.');
-  return data.routes[0] as OsrmRoute;
-}
 
 function formatDuration(seconds: number) {
   const totalMinutes = Math.max(1, Math.round(seconds / 60));
@@ -60,6 +41,8 @@ export default function PlanTrip() {
 
   const [origin, setOrigin] = useState('Batangas City');
   const [destination, setDestination] = useState('Alabang, Muntinlupa');
+  const [originSelection, setOriginSelection] = useState<PlaceSelection | null>(null);
+  const [destinationSelection, setDestinationSelection] = useState<PlaceSelection | null>(null);
   const initialPreferences = useMemo(() => readPreferences(), []);
   const initializedDefaultVehicle = useRef(false);
   const [vehicleId, setVehicleId] = useState(initialPreferences.defaultVehicleId || defaultVehicle?.id || 'custom');
@@ -101,7 +84,7 @@ export default function PlanTrip() {
   useEffect(() => {
     const reuseId = searchParams.get('reuse'); if (!reuseId) return;
     const trip = getTrip(reuseId); if (!trip) return;
-    setOrigin(trip.origin); setDestination(trip.destination);
+    setOrigin(trip.origin); setDestination(trip.destination); setOriginSelection(null); setDestinationSelection(null);
     setVehicleId(vehicles.some((vehicle) => vehicle.id === trip.vehicleId) ? trip.vehicleId : 'custom');
     setTripType(trip.tripType); setDistance(trip.oneWayDistance); setEfficiency(trip.efficiency); setFuelPrice(trip.fuelPrice);
     setParking(trip.parking); setPassengers(trip.passengers);
@@ -161,19 +144,30 @@ export default function PlanTrip() {
 
   async function findRoute() {
     setSavedMessage(''); setRouteError(''); setError('');
+    if (!routingConfigured) { setRouteError('Free routing is not configured yet. Add VITE_GRAPHHOPPER_API_KEY to your .env file.'); return; }
     if (!origin.trim() || !destination.trim()) { setRouteError('Enter an origin and destination first.'); return; }
     if (origin.trim().toLowerCase() === destination.trim().toLowerCase()) { setRouteError('Origin and destination must be different.'); return; }
     setRouteLoading(true);
     try {
-      const [originPlace, destinationPlace] = await Promise.all([geocodePlace(origin.trim()), geocodePlace(destination.trim())]);
-      if (!originPlace) throw new Error(`Could not find “${origin.trim()}”. Try adding the city or province.`);
-      if (!destinationPlace) throw new Error(`Could not find “${destination.trim()}”. Try adding the city or province.`);
-      const route = await fetchDrivingRoute(originPlace.coords, destinationPlace.coords);
-      const routeKm = route.distance / 1000; const line = route.geometry.coordinates.map(([lng, lat]) => [lat, lng] as LatLng);
-      setRouteOrigin(originPlace.coords); setRouteDestination(destinationPlace.coords); setRouteLine(line);
-      setDistance(Number(routeKm.toFixed(1))); setRouteDuration(route.duration); setRouteResolved(true); setManualDistance(false); setHasCalculated(true);
-    } catch (routeFailure) { setRouteError(routeFailure instanceof Error ? routeFailure.message : 'Unable to find that route right now.'); setRouteResolved(false); }
-    finally { setRouteLoading(false); }
+      const resolvedOrigin = originSelection ?? await geocodeFirst(origin.trim());
+      const resolvedDestination = destinationSelection ?? await geocodeFirst(destination.trim());
+      const route = await findDrivingRoute(resolvedOrigin.coords, resolvedDestination.coords);
+      if (!route.distanceKm) throw new Error('The routing service returned a route without a usable driving distance.');
+      setOriginSelection(resolvedOrigin);
+      setDestinationSelection(resolvedDestination);
+      setOrigin(resolvedOrigin.label);
+      setDestination(resolvedDestination.label);
+      setRouteOrigin(resolvedOrigin.coords);
+      setRouteDestination(resolvedDestination.coords);
+      setRouteLine(route.line);
+      setDistance(Number(route.distanceKm.toFixed(1)));
+      setRouteDuration(route.durationSeconds);
+      setRouteResolved(true); setManualDistance(false); setHasCalculated(true);
+    } catch (routeFailure) {
+      const message = routeFailure instanceof Error ? routeFailure.message : 'Unable to find that route right now.';
+      setRouteError(message);
+      setRouteResolved(false);
+    } finally { setRouteLoading(false); }
   }
 
   function calculate(e: FormEvent) {
@@ -215,22 +209,22 @@ export default function PlanTrip() {
   function setDriver(id: string) { setMembers((items) => items.map((item) => ({ ...item, isDriver: item.id === id }))); }
 
   return <div className="page-stack">
-    <PageHeader eyebrow="Plan Trip" title="Build your trip estimate" subtitle="Find the road route, organize toll segments, add real trip expenses, and see the true cost before you leave." />
+    <PageHeader eyebrow="Plan Trip" title="Build your trip estimate" subtitle="Use free OpenStreetMap-based routing to find the driving route, organize toll segments, add real trip expenses, and see the true cost before you leave." />
     {tripSyncError && <div className="sync-alert" role="alert"><span>{tripSyncError}</span><button type="button" onClick={clearTripSyncError}>Dismiss</button></div>}
     {savedMessage && <div className="trip-save-notice"><CheckCircle2 size={17}/><span>{savedMessage}</span></div>}
 
     <section className="route-planner-panel panel">
       <div className="route-planner-fields">
-        <div className="route-planner-heading"><span className="section-icon"><LocateFixed size={18}/></span><div><strong>Automatic route finder</strong><span>Search Philippine places and calculate the road distance for your estimate.</span></div></div>
+        <div className="route-planner-heading"><span className="section-icon"><LocateFixed size={18}/></span><div><strong>Automatic route finder</strong><span>Search Philippine places and calculate the road distance using free OpenStreetMap-based services.</span></div></div>
         <div className="route-search-grid">
-          <Field label="Origin" icon={<MapPin size={18}/>}> <input value={origin} onChange={(e) => { setOrigin(e.target.value); setRouteResolved(false); }} placeholder="Batangas City" /> </Field>
-          <Field label="Destination" icon={<Navigation size={18}/>}> <input value={destination} onChange={(e) => { setDestination(e.target.value); setRouteResolved(false); }} placeholder="Alabang, Muntinlupa" /> </Field>
-          <button className="primary-btn route-find-btn" type="button" onClick={findRoute} disabled={routeLoading}>{routeLoading ? <LoaderCircle className="spin" size={18}/> : <Route size={18}/>} {routeLoading ? 'Finding route…' : 'Find route'}</button>
+          <FreePlaceInput label="Origin" value={origin} placeholder="Batangas City" icon={<MapPin size={18}/>} onChange={(value) => { setOrigin(value); setRouteResolved(false); }} onPlaceSelected={setOriginSelection}/>
+          <FreePlaceInput label="Destination" value={destination} placeholder="Alabang, Muntinlupa" icon={<Navigation size={18}/>} onChange={(value) => { setDestination(value); setRouteResolved(false); }} onPlaceSelected={setDestinationSelection}/>
+          <button className="primary-btn route-find-btn" type="button" onClick={findRoute} disabled={routeLoading || !routingConfigured}>{routeLoading ? <LoaderCircle className="spin" size={18}/> : <Route size={18}/>} {routeLoading ? 'Finding route…' : 'Find route'}</button>
         </div>
         {routeError && <div className="route-inline-error">{routeError} <button type="button" onClick={() => setManualDistance(true)}>Enter distance manually</button></div>}
-        {routeResolved && <div className="route-found-summary"><span><Route size={16}/><strong>{number.format(distance)} km</strong> one way</span><span><Clock3 size={16}/><strong>{formatDuration(routeDuration)}</strong> estimated drive</span><span className="route-source-pill">Road route found</span></div>}
+        {routeResolved && <div className="route-found-summary"><span><Route size={16}/><strong>{number.format(distance)} km</strong> one way</span><span><Clock3 size={16}/><strong>{formatDuration(routeDuration)}</strong> estimated drive</span><span className="route-source-pill">OpenStreetMap route</span></div>}
       </div>
-      <div className="route-map-column"><RouteMap origin={routeOrigin} destination={routeDestination} route={routeLine}/>{!routeResolved && !routeLoading && <div className="map-empty-overlay"><Navigation size={24}/><strong>Your route will appear here</strong><span>Enter two places and click Find route.</span></div>}</div>
+      <div className="route-map-column"><RouteMap origin={routeOrigin} destination={routeDestination} route={routeLine}/>{!routeResolved && !routeLoading && <div className="map-empty-overlay"><Navigation size={24}/><strong>Your route will appear here</strong><span>Choose two places and click Find route.</span></div>}</div>
     </section>
 
     <section className="calculator-layout">
