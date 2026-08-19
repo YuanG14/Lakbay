@@ -91,7 +91,7 @@ users/{uid}/trips/{tripId}
 
 ## Mapping and routing note
 
-Lakbay uses Free Maps Platform for place autocomplete, route visualization, driving distance, and estimated travel time. A billing-enabled Google Cloud project and a browser API key are required. Enable **Maps JavaScript API**, **Places API (New)**, and **Routes API**. The manual-distance fallback remains available if routing is unavailable. See `FREE_MAPS_SETUP.md` for the exact setup.
+Lakbay uses Free Maps Platform for place autocomplete, route visualization, driving distance, and estimated travel time. A billing-enabled Google Cloud project and a browser API key are required. Enable **Maps JavaScript API**, **Places API (New)**, and **Routes API**. The manual-distance fallback remains available if routing is unavailable. 
 
 ## Toll-rate note
 
@@ -123,4 +123,4 @@ The route finder uses Google Places autocomplete restricted to the Philippines, 
 
 ## Free mapping stack
 
-The route finder uses MapLibre GL JS, OpenStreetMap tiles/data, and GraphHopper for geocoding + road routing. This build does not require Google Maps or a Google Cloud billing account. See `FREE_MAPS_SETUP.md`.
+The route finder uses MapLibre GL JS, OpenStreetMap tiles/data, and GraphHopper for geocoding + road routing. This build does not require Google Maps or a Google Cloud billing account. 

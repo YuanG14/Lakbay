@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import NetworkStatus from '../ui/NetworkStatus';
 
 const items = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/plan-trip', label: 'Plan Trip', icon: Compass },
   { to: '/trips', label: 'My Trips', icon: Route },
   { to: '/garage', label: 'My Garage', icon: CarFront },
