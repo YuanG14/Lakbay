@@ -193,3 +193,36 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
   .landing-feature-card p{font-size:13px}
   .landing-steps p{font-size:13px}
 }
+
+/* Landing page spacing refinement */
+.landing-proof-strip{
+  margin-bottom:64px;
+}
+.landing-proof-strip>div{
+  padding-top:20px;
+  padding-bottom:20px;
+}
+.landing-section{
+  padding-top:8px;
+  padding-bottom:84px;
+}
+.landing-why{
+  padding:68px 20px 58px;
+}
+.landing-why-card{
+  padding:38px 42px;
+}
+.landing-security{
+  margin-top:18px;
+}
+.landing-footer{
+  min-height:94px;
+}
+
+@media(max-width:700px){
+  .landing-proof-strip{margin-bottom:56px}
+  .landing-section{padding-bottom:64px}
+  .landing-why{padding:52px 14px 44px}
+  .landing-why-card{padding:26px 22px}
+  .landing-footer{min-height:0;padding:26px 0}
+}
