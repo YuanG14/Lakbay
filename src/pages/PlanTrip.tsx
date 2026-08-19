@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import {
   ArrowRight, Calculator, CarFront, CheckCircle2, CircleDollarSign, Clock3, Fuel,
   Hotel, LoaderCircle, LocateFixed, MapPin, Navigation, ParkingCircle, Plus, ReceiptText,
-  Route, Save, Ship, Soup, Trash2, UsersRound, WalletCards,
+  Route, Save, Ship, Soup, Trash2, UsersRound, WalletCards, Trophy, TrendingDown, Sparkles,
 } from 'lucide-react';
 import PageHeader from '../components/ui/PageHeader';
 import RouteMap, { LatLng } from '../components/RouteMap';
@@ -107,6 +107,23 @@ export default function PlanTrip() {
     const fuelShare = total > 0 ? (fuelCost / total) * 100 : 0;
     return { totalDistance, fuelUsed, fuelCost, tollOneWay, tollCost, parkingCost, extraCost, total, perPerson, costPerKm, fuelShare };
   }, [distance, efficiency, fuelPrice, tollItems, parking, expenseItems, passengers, tripType]);
+
+  const vehicleComparisons = useMemo(() => {
+    const fixedCosts = result.tollCost + result.parkingCost + result.extraCost;
+    return vehicles
+      .filter((vehicle) => vehicle.efficiency > 0)
+      .map((vehicle) => {
+        const fuelUsed = result.totalDistance / vehicle.efficiency;
+        const fuelCost = fuelUsed * Math.max(0, fuelPrice);
+        const total = fuelCost + fixedCosts;
+        return { ...vehicle, fuelUsed, fuelCost, total, perPerson: passengers > 0 ? total / passengers : total };
+      })
+      .sort((a, b) => a.total - b.total);
+  }, [vehicles, result.totalDistance, result.tollCost, result.parkingCost, result.extraCost, fuelPrice, passengers]);
+
+  const bestComparison = vehicleComparisons[0];
+  const selectedComparison = vehicleComparisons.find((vehicle) => vehicle.id === vehicleId);
+  const selectedSavings = selectedComparison && bestComparison ? Math.max(0, selectedComparison.total - bestComparison.total) : 0;
 
   async function findRoute() {
     setSavedMessage(''); setRouteError(''); setError('');
@@ -218,6 +235,41 @@ export default function PlanTrip() {
           <div className="result-footer-stats"><div><span>Total distance</span><strong>{number.format(result.totalDistance)} km</strong></div><div><span>Cost per km</span><strong>{peso.format(result.costPerKm)}</strong></div></div>
           <button className="result-save-btn" type="button" onClick={saveTrip}><Save size={17}/> Save this trip</button>
         </div>
+        <div className="panel vehicle-comparison-card">
+          <div className="comparison-heading">
+            <div>
+              <div className="section-kicker">Vehicle comparison</div>
+              <h3>Which car costs less for this trip?</h3>
+              <p>Lakbay applies the same route and non-fuel expenses to every saved vehicle, then compares fuel use using each vehicle's efficiency.</p>
+            </div>
+            {bestComparison && <div className="best-vehicle-badge"><Trophy size={15}/><span>Best value</span><strong>{bestComparison.name}</strong></div>}
+          </div>
+
+          {vehicleComparisons.length < 2 ? (
+            <div className="comparison-empty"><Sparkles size={20}/><div><strong>Add another vehicle to compare</strong><span>Save at least two vehicles in My Garage and Lakbay will rank them here automatically.</span></div></div>
+          ) : (
+            <>
+              {selectedSavings > 0 && bestComparison && <div className="comparison-saving-callout"><TrendingDown size={18}/><div><strong>Switching to {bestComparison.name} saves about {peso.format(selectedSavings)}.</strong><span>That is {peso.format(selectedSavings / Math.max(1, passengers))} less per traveler for this plan.</span></div></div>}
+              {selectedComparison?.id === bestComparison?.id && <div className="comparison-saving-callout best-current"><Trophy size={18}/><div><strong>You already selected the cheapest saved vehicle.</strong><span>{bestComparison.name} has the lowest estimated cost for this trip.</span></div></div>}
+
+              <div className="comparison-table">
+                <div className="comparison-table-head"><span>Vehicle</span><span>Efficiency</span><span>Fuel</span><span>Trip cost</span><span></span></div>
+                {vehicleComparisons.map((vehicle, index) => {
+                  const savingVsWorst = vehicleComparisons.length > 1 ? vehicleComparisons[vehicleComparisons.length - 1].total - vehicle.total : 0;
+                  const isSelected = vehicle.id === vehicleId;
+                  return <div className={`comparison-row ${index === 0 ? 'winner' : ''} ${isSelected ? 'selected-comparison' : ''}`} key={vehicle.id}>
+                    <div className="comparison-vehicle"><span className="comparison-rank">#{index + 1}</span><div><strong>{vehicle.name}</strong><small>{vehicle.year} • {vehicle.fuelType}{isSelected ? ' • Selected' : ''}</small></div>{index === 0 && <span className="winner-pill"><Trophy size={11}/> Cheapest</span>}</div>
+                    <div><strong>{number.format(vehicle.efficiency)} km/L</strong><small>{number.format(vehicle.fuelUsed)} L used</small></div>
+                    <div><strong>{peso.format(vehicle.fuelCost)}</strong><small>fuel estimate</small></div>
+                    <div><strong>{peso.format(vehicle.total)}</strong><small>{index === 0 ? `${peso.format(vehicle.perPerson)} / person` : savingVsWorst > 0 ? `Saves ${peso.format(savingVsWorst)}` : 'Highest estimate'}</small></div>
+                    <button type="button" className={isSelected ? 'comparison-use-btn active' : 'comparison-use-btn'} onClick={() => setVehicleId(vehicle.id)} disabled={isSelected}>{isSelected ? 'Using' : 'Use vehicle'}</button>
+                  </div>;
+                })}
+              </div>
+            </>
+          )}
+        </div>
+
         <div className="panel trip-insight-card"><div className="section-kicker">Budget insight</div><strong>{result.fuelShare >= 50 ? 'Fuel is your biggest trip cost.' : result.tollCost > result.fuelCost ? 'Tolls cost more than fuel on this plan.' : 'Your costs are fairly distributed.'}</strong><p>Fuel currently makes up {number.format(result.fuelShare)}% of your estimated total. Adjust tolls or extra expenses above and Lakbay updates instantly.</p></div>
         <div className="panel calculation-note"><div className="section-kicker">How Lakbay calculates</div><p><strong>Fuel cost</strong> = total distance ÷ fuel efficiency × fuel price.</p><p><strong>Tolls</strong> = sum of one-way toll segments, doubled for a round trip.</p><p><strong>Extra expenses</strong> are one-time trip costs unless you enter them differently.</p><p><strong>Per person</strong> = total trip cost ÷ number of travelers.</p></div>
       </aside>
