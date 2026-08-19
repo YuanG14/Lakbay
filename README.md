@@ -1,36 +1,31 @@
-# Lakbay — Phase 2
+# Lakbay — Smart Trip Cost Planner
 
-Smart Trip Cost Planner for Philippine road trips.
+## Phase 3: My Garage
 
-## Phase 2 features
+Phase 3 adds persistent vehicle profiles on top of the Phase 2 trip calculator.
 
-- Functional trip cost calculator
-- One-way and round-trip calculations
-- Fuel usage and fuel cost estimation
-- Toll, parking, and other expenses
-- Passenger cost splitting
-- Cost per kilometer
-- Responsive live result summary
-- Input validation
-- Philippine Peso formatting
-- Existing Phase 1 dashboard/pages preserved
+### Included
+- Add vehicle profiles
+- Edit saved vehicles
+- Delete vehicles
+- Set a default vehicle
+- LocalStorage persistence (before Firebase is introduced)
+- Garage summary cards
+- Saved vehicles automatically appear in Plan Trip
+- Selecting a saved vehicle automatically applies its fuel efficiency
+- Custom vehicle option still allows manual fuel-efficiency entry
+- Responsive desktop/mobile UI
+- PHP currency formatting from earlier phases
 
-## Calculation rules
-
-- Total distance = one-way distance × 2 for round trips
-- Fuel used = total distance ÷ km/L
-- Fuel cost = fuel used × fuel price
-- Round-trip toll = one-way toll × 2
-- Total = fuel + toll + parking + other expenses
-- Per person = total ÷ travelers
-
-## Run locally
-
+### Run locally
 ```bash
 npm install
 npm run dev
 ```
 
-## Recommended branch
+### Git branch
+```bash
+git checkout -b feature/phase-3-my-garage
+```
 
-`feature/phase-2-trip-calculator`
+> Phase 5 will migrate persistence from localStorage to Firebase/Firestore.
