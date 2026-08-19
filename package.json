@@ -1,7 +1,7 @@
 {
-  "name": "lakbay-phase-1",
+  "name": "lakbay-phase-2",
   "private": true,
-  "version": "1.0.0",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
