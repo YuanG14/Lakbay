@@ -1,14 +1,19 @@
 {
   "name": "lakbay",
   "private": true,
-  "version": "12.2.0",
+  "version": "13.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "check": "npm run typecheck && npm run build"
+    "check": "npm run typecheck && npm run build",
+    "pwa:preview": "vite preview --host 0.0.0.0",
+    "cap:sync": "npm run build && cap sync",
+    "cap:add:android": "cap add android",
+    "android:prepare": "npm run build && cap sync android",
+    "android:open": "npm run android:prepare && cap open android"
   },
   "dependencies": {
     "firebase": "^12.2.1",
@@ -16,13 +21,17 @@
     "react": "latest",
     "react-dom": "latest",
     "react-router-dom": "latest",
-    "maplibre-gl": "^5.7.1"
+    "maplibre-gl": "^5.7.1",
+    "@capacitor/core": "latest"
   },
   "devDependencies": {
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "@vitejs/plugin-react": "latest",
     "typescript": "latest",
-    "vite": "latest"
+    "vite": "latest",
+    "@capacitor/cli": "latest",
+    "@capacitor/android": "latest",
+    "vite-plugin-pwa": "latest"
   }
 }

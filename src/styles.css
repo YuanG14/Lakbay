@@ -725,3 +725,10 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
   .auth-heading>p{font-size:13px}
   .auth-switch-row{flex-wrap:wrap}
 }
+
+/* PWA install experience */
+.lakbay-install-button{border:1px solid #cfe0d7;background:#fff;color:#0f6b51;border-radius:12px;padding:12px 16px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font:800 14px/1 inherit;cursor:pointer;box-shadow:0 8px 20px rgba(15,107,81,.08)}
+.lakbay-install-button:hover{background:#f0f8f4;border-color:#aacfbf;transform:translateY(-1px)}
+@media(max-width:680px){.lakbay-install-button{width:100%;min-height:48px}.lakbay-site-hero-actions .lakbay-site-quiet{width:100%;text-align:center}}
+@media(display-mode:standalone){html,body,#root{min-height:100%;min-height:100dvh}.lakbay-site,.app-shell,.auth-page,.setup-page{min-height:100dvh}}
+@media(max-width:700px){.lakbay-site-hero-actions .lakbay-install-button{width:100%}}

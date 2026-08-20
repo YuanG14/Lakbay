@@ -2,7 +2,7 @@
 
 **Plan the drive. Know the cost before you leave.**
 
-Lakbay is a full-stack web application built for planning road trips in the Philippines. It combines real driving distance, vehicle fuel efficiency, fuel prices, tolls, parking, extra expenses, and passenger cost sharing into one trip estimate.
+Lakbay is a full-stack, installable Progressive Web App (PWA) built for planning road trips in the Philippines. It combines real driving distance, vehicle fuel efficiency, fuel prices, tolls, parking, extra expenses, and passenger cost sharing into one trip estimate.
 
 Instead of calculating fuel in one app, checking routes in another, and splitting expenses manually, Lakbay keeps the entire trip budget in one place.
 
@@ -100,6 +100,18 @@ Insights can identify patterns such as:
 - passenger-sharing opportunities
 - efficient cost-per-kilometer trips
 
+
+### Installable App (PWA)
+
+- Install Lakbay directly from a supported browser
+- Opens in a standalone app-style window
+- Lakbay app icon and splash-friendly theme colors
+- Static app shell is cached for faster repeat launches
+- Automatic PWA updates when a new deployment is available
+- Android and iPhone Home Screen support
+
+> Firebase syncing, live place search, road routing, and map tiles still require an internet connection.
+
 ### Accounts and Preferences
 
 - Firebase Email/Password authentication
@@ -128,7 +140,9 @@ Insights can identify patterns such as:
 | Place Search | GraphHopper Geocoding API |
 | Road Routing | GraphHopper Routing API |
 | Icons | Lucide React |
-| Deployment | Vercel-ready SPA configuration |
+| PWA | vite-plugin-pwa + Workbox |
+| Native wrapper | Capacitor (Android-ready) |
+| Deployment | Vercel-ready SPA/PWA configuration |
 
 This build does **not** use Google Maps.
 
@@ -220,6 +234,13 @@ lakbay/
 │   ├── App.tsx
 │   ├── main.tsx
 │   └── styles.css
+├── public/
+│   ├── favicon.svg
+│   ├── pwa-192x192.png
+│   ├── pwa-512x512.png
+│   ├── pwa-maskable-512x512.png
+│   └── apple-touch-icon.png
+├── capacitor.config.ts
 ├── firestore.rules
 ├── firebase.json
 ├── vercel.json
@@ -457,3 +478,37 @@ Lakbay currently includes the full workflow from public landing page → account
 Lakbay is not just a distance calculator. Its goal is to make road-trip budgeting easier by answering a simple question before the user leaves:
 
 > **How much will this drive actually cost?**
+
+---
+
+## Install Lakbay as an App
+
+### PWA — free and recommended
+
+Deploy Lakbay to HTTPS (for example Vercel), then open the deployed site on your phone. On supported Chromium browsers, Lakbay will expose an **Install Lakbay** button when the browser reports that the app is installable. On iPhone/iPad, use Safari's **Add to Home Screen** action.
+
+The installed PWA uses the same Firebase account and Firestore data as the website.
+
+### Android APK with Capacitor
+
+Capacitor is already configured through `capacitor.config.ts`. After installing dependencies:
+
+```bash
+npm install
+npm run build
+npm run cap:add:android   # first time only
+npm run android:open
+```
+
+`android:open` builds the web app, syncs it into the Android project, and opens Android Studio. From Android Studio you can build an APK for direct installation without publishing to Google Play.
+
+If the `android/` folder already exists, skip `npm run cap:add:android`.
+
+### PWA test build
+
+```bash
+npm run build
+npm run pwa:preview
+```
+
+Open the preview URL in a browser and verify that the manifest/service worker are active.

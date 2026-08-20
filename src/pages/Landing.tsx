@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import InstallAppButton from '../components/pwa/InstallAppButton';
 import { useAuth } from '../context/AuthContext';
 
 const workflow = [
@@ -117,6 +118,7 @@ export default function Landing() {
 
             <div className="lakbay-site-hero-actions">
               <Link className="lakbay-site-primary large" to={primaryHref}>{primaryLabel}<ArrowRight size={18} /></Link>
+              <InstallAppButton />
               <a className="lakbay-site-quiet" href="#how-it-works">See the workflow</a>
             </div>
 
