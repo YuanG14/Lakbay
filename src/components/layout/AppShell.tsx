@@ -52,17 +52,15 @@ export default function AppShell() {
   return (
     <div className="app-shell">
       <a className="skip-link" href="#main-content">Skip to main content</a>
-      <header className="app-navigation desktop-sidebar">
+      <aside className="sidebar desktop-sidebar">
         <Brand />
         {links}
-        <div className="app-navigation-account">
-          <div className="profile-chip" title={`Signed in as ${firstName}`}>
-            <div className="avatar" aria-hidden="true">{initials}</div>
-            <div className="profile-copy"><strong>{firstName}</strong><span>Traveler account</span></div>
-          </div>
-          <button className="icon-btn" disabled={signingOut} onClick={handleLogout} aria-label="Sign out" title="Sign out"><LogOut size={18} /></button>
+        <div className="sidebar-card">
+          <div className="sidebar-card-icon">₱</div>
+          <strong>Plan smarter trips</strong>
+          <p>Estimate travel costs before you hit the road.</p>
         </div>
-      </header>
+      </aside>
 
       {open && <button className="scrim" onClick={() => setOpen(false)} aria-label="Close menu" />}
       <aside className={`sidebar mobile-drawer${open ? ' open' : ''}`} aria-hidden={!open}>
@@ -77,8 +75,14 @@ export default function AppShell() {
         <NetworkStatus />
         <header className="topbar">
           <button className="icon-btn mobile-menu" onClick={() => setOpen(true)} aria-label="Open navigation"><Menu size={21} /></button>
-          <Brand />
-          <span className="mobile-route-note">Trip workspace</span>
+          <div className="topbar-spacer" />
+          <div className="profile-chip" title={`Signed in as ${firstName}`}>
+            <div className="avatar" aria-hidden="true">{initials}</div>
+            <div className="profile-copy">
+              <strong>{firstName}</strong>
+            </div>
+          </div>
+          <button className="icon-btn" disabled={signingOut} onClick={handleLogout} aria-label="Sign out" title="Sign out"><LogOut size={18} /></button>
         </header>
         <main className="page-wrap" id="main-content" tabIndex={-1}><Outlet /></main>
       </div>

@@ -46,7 +46,7 @@ export default function Dashboard() {
 
   return (
     <div className="page-stack">
-      <PageHeader eyebrow={dateLabel.format(now)} title={`${greeting}, ${name}`} subtitle="Where are you going today? Let Lakbay estimate the cost before you drive." />
+      <PageHeader eyebrow={dateLabel.format(now)} title={`${greeting}, ${name} 👋`} subtitle="Where are you going today? Let Lakbay estimate the cost before you drive." />
 
       {(tripError || vehicleError) && <div className="sync-alert" role="alert">{tripError || vehicleError}</div>}
 
